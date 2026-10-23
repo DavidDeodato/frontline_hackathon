@@ -1,6 +1,8 @@
 # Frontline
 
-**Pratique conversas difíceis. Entenda consequências. Experimente outra resposta.**
+**Cada escolha tem uma consequência.**
+
+Pratique conversas difíceis, entenda consequências e experimente outra resposta.
 
 Frontline é um simulador narrativo de atendimento profissional. A pessoa prepara uma situação, conversa com um cliente fictício, consulta informações no ambiente e recebe uma avaliação ligada às próprias falas. Uma nova tentativa permite comparar decisões sem colocar um cliente real em risco.
 
@@ -24,7 +26,7 @@ No episódio **A viagem de amanhã**, Roberto precisa de um aparelho antes de vi
 
 ## Estado do projeto
 
-**Protótipo em desenvolvimento, criado para o DevDay Community Hackathon São Paulo de 23 de outubro de 2026.** O recorte principal é o desafio de simulação de atendimento profissional.
+**Protótipo em desenvolvimento, criado para o DevDay Community Hackathon São Paulo de 23 de outubro de 2026.** A proposta parte do desafio #5, com mecânicas narrativas inspiradas no #10. O recorte de inscrição é a simulação de atendimento profissional.
 
 Esta primeira publicação reúne a especificação de produto e as dez idealizações visuais. O código do protótipo local está em integração e será publicado em um próximo snapshot após as verificações de portabilidade. A jornada completa, a fidelidade visual e a operação pública ainda precisam ser verificadas. Os ambientes e personagens são fictícios; resultados de treino não representam certificação profissional nem eficácia de aprendizagem comprovada.
 
