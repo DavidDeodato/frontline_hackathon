@@ -28,11 +28,11 @@ No episódio **A viagem de amanhã**, Roberto precisa de um aparelho antes de vi
 
 **Protótipo em desenvolvimento, criado para o DevDay Community Hackathon São Paulo de 23 de outubro de 2026.** A proposta parte do desafio #5, com mecânicas narrativas inspiradas no #10. O recorte de inscrição é a simulação de atendimento profissional.
 
-Esta primeira publicação reúne a especificação de produto e as dez idealizações visuais. O código do protótipo local está em integração e será publicado em um próximo snapshot após as verificações de portabilidade. A jornada completa, a fidelidade visual e a operação pública ainda precisam ser verificadas. Os ambientes e personagens são fictícios; resultados de treino não representam certificação profissional nem eficácia de aprendizagem comprovada.
+Este repositório disponibiliza uma **versão de trabalho do código**, junto à especificação de produto e às dez idealizações visuais. O código pode ser estudado e executado localmente; ainda não é uma versão final homologada. Consulte o [estado da implementação](docs/product/implementation-status.md) para conhecer as verificações e pendências desta publicação. A jornada completa, a fidelidade visual e a operação pública ainda precisam ser verificadas. Os ambientes e personagens são fictícios; resultados de treino não representam certificação profissional nem eficácia de aprendizagem comprovada.
 
 | Camada | Estado desta versão |
 |---|---|
-| Web, API e persistência local | Protótipo local em integração; publicação e validação completa pendentes |
+| Web, API e persistência local | Código publicado como versão de trabalho; validação final pendente |
 | Cenário demonstrativo | Um personagem, três decisões e três finais definidos |
 | OpenAI | Adaptador presente; operação real depende de configuração e teste |
 | WhatsApp, banco cloud e registro em blockchain | Integrações planejadas; não apresentadas como fluxo concluído |
@@ -40,7 +40,7 @@ Esta primeira publicação reúne a especificação de produto e as dez idealiza
 
 ## Executar localmente
 
-As instruções abaixo descrevem o protótipo e serão utilizáveis neste repositório depois da publicação do código. O primeiro snapshot contém a documentação e os conceitos visuais.
+As instruções abaixo executam o protótipo local. A demonstração determinística não exige credenciais.
 
 Requer **Node.js 24 ou superior** e npm. A persistência local usa SQLite nativo do Node.
 
@@ -83,6 +83,7 @@ Esses comandos permitem verificar a versão local; sua presença aqui não repre
 
 ## Documentação
 
+- [Estado da implementação e verificações](docs/product/implementation-status.md)
 - [Solução completa: problema, personas, telas, dados e integrações](docs/product/solution.md)
 - [Guia de estilo e limites de construção](docs/product/style-guide.md)
 - [Roteiro de demonstração de três minutos](docs/product/demo.md)

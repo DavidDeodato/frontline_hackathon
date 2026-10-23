@@ -21,3 +21,6 @@ test-results/
 *.p12
 .DS_Store
 Thumbs.db
+
+# Local test sessions and diagnostic artifacts
+qa/evidence/

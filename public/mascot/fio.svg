@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 320" fill="none" role="img" aria-label="Fio, guia do Frontline">
+<defs>
+<linearGradient id="shell" x1="95" y1="65" x2="265" y2="260" gradientUnits="userSpaceOnUse"><stop stop-color="#687D8A"/><stop offset=".24" stop-color="#344651"/><stop offset=".65" stop-color="#18242A"/><stop offset="1" stop-color="#101A20"/></linearGradient>
+<radialGradient id="light" cx="0" cy="0" r="1" gradientTransform="translate(104 86) rotate(40) scale(178 125)" gradientUnits="userSpaceOnUse"><stop stop-color="#ECF9FF" stop-opacity=".23"/><stop offset="1" stop-color="#B1D4E7" stop-opacity="0"/></radialGradient>
+<linearGradient id="cyan" x1="77" y1="225" x2="111" y2="263" gradientUnits="userSpaceOnUse"><stop stop-color="#8BF0F2"/><stop offset=".5" stop-color="#37CFDB"/><stop offset="1" stop-color="#16A0B2"/></linearGradient>
+<linearGradient id="ivory" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFFEF8"/><stop offset="1" stop-color="#D7E1E5"/></linearGradient>
+</defs>
+<g data-part="rig">
+ <g data-part="body"><path d="M142 52C103 53 81 67 73 107C65 145 63 183 76 200C82 209 104 213 117 224C126 231 121 248 134 253C177 266 239 257 264 232C290 206 293 129 278 95C259 51 192 46 142 52Z" fill="url(#shell)" stroke="#7393A0" stroke-opacity=".3"/>
+ <path d="M142 52C103 53 81 67 73 107C65 145 63 183 76 200C82 209 104 213 117 224C126 231 121 248 134 253C177 266 239 257 264 232C290 206 293 129 278 95C259 51 192 46 142 52Z" fill="url(#light)"/>
+ <path d="M79 119C88 82 111 65 151 61" stroke="#37CFDB" stroke-width="4" stroke-linecap="round"/>
+ </g>
+ <g data-part="tail"><path d="M84 224Q76 219 74 231L68 265Q67 275 79 270L119 249Q127 244 117 238Z" fill="url(#cyan)" stroke="#8BF0F2" stroke-opacity=".45"/></g>
+ <g data-part="left-hand"><path d="M54 182C47 168 37 175 40 186C19 181 13 198 22 209C29 218 50 222 58 214C66 207 63 195 54 182Z" fill="url(#shell)" stroke="#6E919F" stroke-opacity=".4"/></g>
+ <g data-part="right-hand"><path d="M293 155C289 141 292 116 302 111C311 107 319 116 316 127C336 115 350 126 343 143C336 158 313 173 299 172C290 171 289 165 293 155Z" fill="url(#shell)" stroke="#6E919F" stroke-opacity=".4"/></g>
+ <g data-part="eyes"><g data-part="left-eye"><rect x="132" y="130" width="18" height="36" rx="9" fill="url(#ivory)"/></g><g data-part="right-eye"><rect x="202" y="130" width="18" height="36" rx="9" fill="url(#ivory)"/></g></g>
+</g></svg>

@@ -1,0 +1,17 @@
+.frontline-scene{position:relative;width:100%;height:100%;min-height:320px;aspect-ratio:1.31;isolation:isolate;border-radius:12px;overflow:hidden;background:radial-gradient(ellipse at 46% 42%,#45494a 0%,#303638 56%,#22282b 100%);color:#fff}
+.frontline-scene__canvas{position:absolute;inset:0}
+.frontline-scene__canvas canvas{display:block;width:100%;height:100%}
+.frontline-scene__objects{position:absolute;inset:0;pointer-events:none}
+.frontline-scene__anchor{position:absolute;left:50%;top:50%;pointer-events:none}
+.frontline-scene__leader{position:absolute;overflow:visible;left:-130px;top:-90px;pointer-events:none}
+.frontline-scene__leader line{stroke:#f6fbfd;stroke-width:1.2}
+.frontline-scene__leader circle{fill:#f6fbfd}
+.frontline-scene__hotspot{position:absolute;left:var(--label-x,0);top:var(--label-y,0);transform:translate(-50%,-50%);pointer-events:auto;white-space:nowrap;font-family:inherit;font-size:clamp(10px,.86vw,13px);font-weight:600;line-height:1.15;background:#20272ce8;color:#f7fafb;border:1px solid #e2e7e9;border-radius:6px;padding:8px 12px;min-height:34px;box-shadow:0 2px 6px #0002;cursor:pointer;transition:background .15s,border-color .15s}
+.frontline-scene__hotspot:hover,.frontline-scene__hotspot.is-selected{border-color:#72eff6;background:#123a42;color:#fff}
+.frontline-scene__hotspot:focus-visible{outline:3px solid #37cfdb;outline-offset:4px}
+.frontline-scene__hotspot:disabled{cursor:wait;opacity:.65}
+.frontline-scene__caption{position:absolute;bottom:17px;left:19px;font:400 12px/1.2 sans-serif;color:#c4cccf;pointer-events:none}
+.frontline-scene__fallback{position:absolute;inset:0;display:grid;place-content:center;padding:32px;color:#e9f2f4;font:400 15px/1.5 sans-serif;text-align:center}
+.frontline-scene--preview{min-height:0}
+@media(max-width:700px){.frontline-scene{min-height:270px;aspect-ratio:1.15}.frontline-scene__hotspot{font-size:10px;padding:7px 8px;min-height:32px}.frontline-scene__caption{font-size:10px;bottom:10px;left:12px}.frontline-scene--preview{min-height:0}}
+@media(prefers-reduced-motion:reduce){.frontline-scene__hotspot{transition:none}}
