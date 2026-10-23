@@ -2,7 +2,7 @@
 
 23 de outubro de 2026 · versão de trabalho · snapshot de código de 15h10 BRT.
 
-O código desta publicação permite colaboração e execução local. A [demonstração pública](https://frontline-production-4f55.up.railway.app) teve o núcleo anterior verificado em HTTPS às 15h11 BRT. A atualização de conta e Fio ainda será conferida nesse destino; não representa aceite visual final.
+A [demonstração pública](https://frontline-production-4f55.up.railway.app) está publicada com o código `a65b907`. O deploy final, a interface, a conta e a preservação de sessão foram verificados em HTTPS. Essa verificação funcional não representa aceite visual final nem garantia semântica para todos os diálogos.
 
 ## Código incluído
 
@@ -28,15 +28,23 @@ O código desta publicação permite colaboração e execução local. A [demons
 
 Os testes e o build foram executados na cópia isolada desta publicação, com os arquivos conferidos por SHA-256 antes e depois. Incluem controles de conta, migração dos dados do visitante, ajuda, runtime, origem, persistência, orçamento, API, regras, conversas e integrações simuladas.
 
-Na publicação anterior, Railway confirmou deploy concluído, uma réplica e volume em `/data`. A verificação HTTP confirmou página, JS, CSS, biblioteca e health em modo OpenAI, com cookies Secure e HttpOnly. A preservação de uma sessão existente após a atualização ainda está em verificação.
+## Verificação no endereço público
+
+- Railway confirmou deploy concluído, uma réplica e volume persistente em `/data`. Página, JS, CSS, biblioteca e health responderam HTTP 200; o servidor informou modo OpenAI.
+- Uma sessão fictícia criada na versão anterior manteve o mesmo identificador, dois documentos consultados, a mensagem inicial e o estado pausado após a atualização do contêiner. Retomar e pausar funcionaram novamente.
+- Cadastro preservou o exercício do visitante. Logout ocultou o histórico; login e recarregamento recuperaram a sessão. Cookies de autenticação foram observados com Secure e HttpOnly.
+- A inspeção do navegador cobriu desktop e mobile. O lote final de rede teve 25 respostas HTTP 200 e nenhuma exceção observada; não é uma auditoria completa de acessibilidade ou desempenho.
+- Uma única pergunta sintética de ajuda recebeu resposta OpenAI em HTTPS, com ações de navegação permitidas; o histórico permaneceu salvo após nova leitura. A chamada levou aproximadamente 3,9 segundos. Esse ensaio pontual não prova o fluxo inteiro de treinamento com IA no servidor público.
+
+O limite configurado é de 36 chamadas e 46.800 tokens de saída reservados, compartilhado entre operações de IA. As contagens globais do ledger cloud não foram inspecionadas; não se afirma que a quota esteja intacta nem que o teste tenha sido a única utilização. Não houve redefinição do orçamento. Os 210 testes automatizados são o total da suíte; verificações adicionais não foram somadas como testes independentes.
 
 ## Limites atuais
 
-- Conta e ajuda possuem testes locais. Verificação de email, recuperação de senha e autenticação por serviços externos não estão implementadas.
+- Verificação de email, recuperação de senha e autenticação por serviços externos não estão implementadas.
 - WhatsApp entre dispositivos e transações em Devnet não estão habilitados. Presença de adaptador não comprova uma operação externa.
 - Revisão responsiva, acessibilidade e fidelidade às dez idealizações visuais continuam pendentes.
 - Testes pontuais com IA não demonstram robustez de todos os cenários, eficácia de aprendizagem ou certificação profissional.
-- Persistência e quota em ambiente cloud precisam de verificação após o deploy. Não reutilize bancos de teste em produção.
+- Persistência de sessão foi verificada após o deploy; o contador global da quota cloud não foi lido. Não reutilize bancos de teste nem reinicie o ledger para renovar orçamento.
 
 ## Reproduzir
 

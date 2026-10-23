@@ -6,9 +6,9 @@ Pratique conversas difíceis, entenda consequências e experimente outra respost
 
 Frontline é um simulador narrativo de atendimento profissional. A pessoa prepara uma situação, conversa com um cliente fictício, consulta informações no ambiente e recebe uma avaliação ligada às próprias falas. Uma nova tentativa permite comparar decisões sem colocar um cliente real em risco.
 
-![Idealização do ensaio Frontline: ambiente 2.5D, documentos e conversa com Roberto](docs/visuals/images/scene/04-ensaio-v2.png)
+![Frontline em execução: cena 2.5D, documentos consultados e conversa pausada](docs/product/images/frontline-practice.jpg)
 
-*Idealização visual do produto. Esta imagem representa a direção de design; não é uma captura do aplicativo em execução.*
+*Captura da aplicação pública em 23 de outubro de 2026: exercício fictício pausado após consultar documentos. As idealizações de design continuam disponíveis na galeria abaixo.*
 
 ## Para quem
 
@@ -22,7 +22,7 @@ No episódio **A viagem de amanhã**, Roberto precisa de um aparelho antes de vi
 - **Praticar:** conversar por texto em uma sala 2.5D com ordem de serviço, política e agenda.
 - **Compreender:** receber três critérios de avaliação, trechos da conversa e uma melhoria concreta.
 - **Experimentar:** repetir o exercício e comparar consequências, preservando a tentativa anterior.
-- **Continuar:** retomar sessões salvas; WhatsApp e exportação verificável fazem parte da expansão planejada.
+- **Continuar:** retomar sessões salvas, exportar tentativas e verificar a integridade da cópia. WhatsApp permanece uma expansão planejada.
 
 **Demonstração:** [abrir Frontline](https://frontline-production-4f55.up.railway.app). Versão de trabalho; atualizações podem causar uma breve indisponibilidade.
 
@@ -30,7 +30,7 @@ No episódio **A viagem de amanhã**, Roberto precisa de um aparelho antes de vi
 
 **Protótipo em desenvolvimento, criado para o DevDay Community Hackathon São Paulo de 23 de outubro de 2026.** A proposta parte do desafio #5, com mecânicas narrativas inspiradas no #10. O recorte de inscrição é a simulação de atendimento profissional.
 
-Este repositório disponibiliza uma **versão de trabalho do código**, junto à especificação de produto e às dez idealizações visuais. O código pode ser estudado e executado localmente; ainda não é uma versão final homologada. Consulte o [estado da implementação](docs/product/implementation-status.md) para conhecer as verificações e pendências desta publicação. A jornada completa e a fidelidade visual continuam em revisão. A publicação inicial teve HTML, assets e API verificados no endereço público. Os ambientes e personagens são fictícios; resultados de treino não representam certificação profissional nem eficácia de aprendizagem comprovada.
+Este repositório disponibiliza uma **versão de trabalho do código**, junto à especificação de produto e às dez idealizações visuais. O código pode ser estudado e executado localmente; ainda não é uma versão final homologada. Consulte o [estado da implementação](docs/product/implementation-status.md) para conhecer as verificações e pendências desta publicação. A jornada completa e a fidelidade visual continuam em revisão. A publicação atual teve HTML, assets, API, cadastro/login e retenção de sessão verificados no endereço público. Os ambientes e personagens são fictícios; resultados de treino não representam certificação profissional nem eficácia de aprendizagem comprovada.
 
 | Camada | Estado desta versão |
 |---|---|
@@ -38,8 +38,10 @@ Este repositório disponibiliza uma **versão de trabalho do código**, junto à
 | Conta e ajuda Fio | Cadastro, login e guia contextual integrados; sem verificação de email ou recuperação de senha |
 | Cenário demonstrativo | Um personagem, três decisões e três finais definidos |
 | OpenAI | Adaptador e conversa contextual presentes; testes reais pontuais, sem garantia semântica geral |
-| WhatsApp, banco cloud e registro em blockchain | Integrações planejadas; não apresentadas como fluxo concluído |
-| Imagens da plataforma | Conceitos visuais; não comprovam implementação |
+| Persistência no servidor | SQLite em volume Railway; sessão preservada após atualização do contêiner |
+| Exportação verificável | Implementada e testada; hash de integridade não equivale a registro em blockchain |
+| WhatsApp e registro em blockchain | Adaptadores presentes, execução externa desativada |
+| Galeria de idealizações | Conceitos visuais; não comprovam implementação |
 
 ## Executar localmente
 
