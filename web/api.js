@@ -9,3 +9,29 @@ export async function api(path,method='GET',body){
 }
 export const uid=()=>crypto.randomUUID();
 export const stateLabel={active:'Em andamento',paused:'Pausado',completed:'Concluído',cancelled:'Interrompido',incomplete:'Incompleto'};
+
+export const BRIEF_LIMIT = 2000;
+export const CONTEXT_LIMIT = 6000;
+export function readIncomingBrief(hash) {
+  const [route, ...queryParts] = String(hash || '').split('?');
+  if (route !== '#/library' || !queryParts.length) return null;
+  const query = queryParts.join('?');
+  if (!/(?:^|&)brief(?:=|&|$)/.test(query)) return null;
+  try {
+    if (query.length > 24000) throw new Error();
+    const values = query.split('&').map(part => {
+      const separator = part.indexOf('=');
+      const key = separator < 0 ? part : part.slice(0, separator);
+      const value = separator < 0 ? '' : part.slice(separator + 1);
+      return [decodeURIComponent(key.replace(/\+/g, ' ')), decodeURIComponent(value.replace(/\+/g, ' '))];
+    }).filter(([key]) => key === 'brief').map(([,value]) => value);
+    if (values.length !== 1 || !values[0].trim() || values[0].length > BRIEF_LIMIT || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(values[0])) throw new Error();
+    return { text: values[0], error: '' };
+  } catch { return { text: '', error: 'Este link não contém um relato válido de até 2000 caracteres. Copie o relato original para a preparação.' }; }
+}
+
+export function combineIncomingBrief(existing, incoming) {
+  const text = existing ? `${existing}\n\n${incoming}` : incoming;
+  if (!incoming.trim() || incoming.length > BRIEF_LIMIT || text.length > CONTEXT_LIMIT) throw new Error('O relato atual e o texto recebido ultrapassam os limites permitidos: 2000 no link e 6000 no contexto. Seu trabalho foi preservado; revise os textos antes de continuar.');
+  return text;
+}
