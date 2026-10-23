@@ -1,6 +1,12 @@
 # Frontline API — contrato v0.1
 
+Correção aditiva v0.1e: [TURN_CONTRACT.md](TURN_CONTRACT.md) condiciona a fala real ao resultado do domínio, com candidato em memória e persistência única após retorno válido. Não muda endpoints ou DTOs públicos existentes.
+
 Extensão compatível de autoria e revisão conversacional: [AUTHOR_CONTRACT.md](AUTHOR_CONTRACT.md), author.v0.2a / provider ai.v0.3. Novo fluxo usa ferramenta real, versões de draft e expectedVersion ao publicar; endpointsP0 permanecem compatíveis.
+
+## Correção compatível v0.1d — fala e consequência
+
+Mariana Oliveira é a participante e atendente (`role=user`); Roberto Almeida é o cliente simulado (`role=npc`). Em modo OpenAI, cada mensagem do cliente contém somente a resposta contextual validada do modelo. Não concatenar uma fala de fixture, não trocar o papel e não mascarar falha semântica com prefixo ou sufixo fixo. Consequências autoritativas permanecem em `commitment`, `attributes`, `ending` e no estado do servidor, apresentadas separadamente pela interface. Esses campos não autorizam o cliente a falar como atendente. Fixture preserva suas respostas predefinidas e rotuladas. O limite de três respostas do participante e oito mensagens permanece.
 
 ## Delta aditivo v0.1c
 

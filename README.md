@@ -34,7 +34,7 @@ Este repositório disponibiliza uma **versão de trabalho do código**, junto à
 |---|---|
 | Web, API e persistência local | Código publicado como versão de trabalho; validação final pendente |
 | Cenário demonstrativo | Um personagem, três decisões e três finais definidos |
-| OpenAI | Adaptador presente; operação real depende de configuração e teste |
+| OpenAI | Adaptador e conversa contextual presentes; testes reais pontuais, sem garantia semântica geral |
 | WhatsApp, banco cloud e registro em blockchain | Integrações planejadas; não apresentadas como fluxo concluído |
 | Imagens da plataforma | Conceitos visuais; não comprovam implementação |
 
@@ -79,7 +79,18 @@ npm test
 npm run build
 ```
 
-Esses comandos permitem verificar a versão local; sua presença aqui não representa uma alegação de testes aprovados. O servidor atual é configurado para desenvolvimento local; publicação exige revisão de configuração, identidade, persistência e origens permitidas.
+Esses comandos permitem verificar a versão local; sua presença aqui não representa uma alegação de testes aprovados. O runtime em `runtime/` reúne interface e API na mesma origem, com persistência SQLite e orçamento de IA durável. A configuração pública precisa de origem HTTPS exata, cookies Secure e volume persistente; veja [runtime/README.md](runtime/README.md).
+
+## Executar interface e API juntas
+
+Após instalar as dependências:
+
+```sh
+npm run build
+npm start
+```
+
+Sem configuração adicional, esse runtime usa o modo determinístico em `http://127.0.0.1:8782`. Para usar `.env.example` com porta 3000 e origem `http://localhost:3000`, copie-o localmente para `.env` e execute `node --env-file=.env runtime/start.mjs`. O modo OpenAI exige `FRONTLINE_PROVIDER_MODE=openai`, credenciais no servidor e limites explícitos. Há um `Dockerfile` para Node.js 24; persistência deve ser montada em `/data`.
 
 ## Documentação
 

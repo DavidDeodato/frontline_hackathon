@@ -1,7 +1,7 @@
 import { AppError, fixtureIntent, fixtureAssessment, intentKeys } from './engine.mjs';
-import { AI_CONTRACT_VERSION, turnSchema, assessmentSchema, authorToolSchema, authorReviewSchema, assertSchema, validateTurn, validateDraft, validateAssessment, validateAuthorReview } from './ai/contracts.mjs';
+import { AI_CONTRACT_VERSION, interpretationSchema, turnReplySchema, assessmentSchema, authorToolSchema, authorReviewSchema, assertSchema, validateInterpretation, validateTurnReply, validateDraft, validateAssessment, validateAuthorReview } from './ai/contracts.mjs';
 import { processBudget, RUN_LIMITS } from './ai/budget.mjs';
-import { DRAFT_INSTRUCTIONS, AUTHOR_REVIEW_INSTRUCTIONS, TURN_INSTRUCTIONS, ASSESSMENT_INSTRUCTIONS } from './ai/prompts.mjs';
+import { DRAFT_INSTRUCTIONS, AUTHOR_REVIEW_INSTRUCTIONS, TURN_INTERPRETATION_INSTRUCTIONS, TURN_REPLY_INSTRUCTIONS, TURN_SPEAKER_REMINDER, ASSESSMENT_INSTRUCTIONS, ROLE_CONTRACT } from './ai/prompts.mjs';
 export { createRequestBudget } from './ai/budget.mjs';
 
 const error = (code, message) => new AppError(503, code, message);
@@ -58,6 +58,10 @@ export function createProvider({ apiKey = process.env.OPENAI_API_KEY, model = pr
     } catch (cause) {
       const safe = cause instanceof AppError ? cause : error(cause?.name === 'TimeoutError' || cause?.name === 'AbortError' ? 'MODEL_TIMEOUT' : 'MODEL_UNAVAILABLE', 'O serviço não respondeu. Sua sessão e sua entrada foram preservadas.');
       entry.status = 'failed'; entry.errorCode = safe.code;
+      const diagnostic = safe.validationDiagnostic;
+      if (diagnostic && /^(compatibility\.sourceQuote|contextualFacts\[\d+\]\.sourceQuote|ruleEvidence\.(loanAvailable|loanDays)|evidence\.[A-Za-z]+|criteria\[\d+\]\.quote)$/.test(diagnostic.fieldPath) && ['not_literal_substring', 'unexpected_source'].includes(diagnostic.reason)) {
+        entry.validation = { fieldPath: diagnostic.fieldPath, reason: diagnostic.reason };
+      }
       throw safe;
     } finally {
       entry.durationMs = Date.now() - start;
@@ -79,12 +83,30 @@ export function createProvider({ apiKey = process.env.OPENAI_API_KEY, model = pr
     mode, contractVersion: AI_CONTRACT_VERSION,
     getTelemetry: () => structuredClone(telemetry),
     getBudget: () => budget.snapshot(),
-    async turn(session, text) {
+    async turn(session, text, { executeTurn } = {}) {
       checkSession(session); checkText(text, 2000);
       const userTurns = session.messages.filter(message => message.role === 'user').length;
       if (session.status !== 'active' || userTurns >= 3 || session.messages.length >= 8) throw new AppError(409, 'SESSION_NOT_ACTIVE', 'Esta sessão não aceita outra resposta.');
       if (mode === 'fixture') return { intent: fixtureIntent(session, text) };
-      return structured('professional_turn', turnSchema(intentKeys), TURN_INSTRUCTIONS, { scenario: session.scenario, history: session.messages, attributes: session.attributes, documentsRead: session.documentsRead, commitment: session.commitment, confirmedState: session._state, remainingUserTurns: 3 - userTurns, lastUserText: text }, value => validateTurn(value, intentKeys, text));
+      if (typeof executeTurn !== 'function' || typeof budget.reserveMany !== 'function') throw error('MODEL_TOOL_NOT_CONFIGURED', 'A aplicação do turno ainda não está disponível no servidor.');
+      const sequences = budget.reserveMany(2, maxOutputTokens);
+      const input = inputData({ scenario: session.scenario, history: session.messages, attributes: session.attributes, documentsRead: session.documentsRead, commitment: session.commitment, confirmedState: session._state, remainingUserTurns: 3 - userTurns, lastUserText: text, roleContract: ROLE_CONTRACT });
+      const tools = [{ type: 'function', name: 'apply_training_turn', description: 'Interpretar os atos de Mariana e projetar uma única transição do exercício. Não escrever a fala de Roberto antes de receber o resultado. A ferramenta decide efeitos, condições e finais.', strict: true, parameters: interpretationSchema(intentKeys) }];
+      const planned = await request('professional_turn_interpretation', { instructions: TURN_INTERPRETATION_INSTRUCTIONS, input, tools, tool_choice: 'required', parallel_tool_calls: false, include: ['reasoning.encrypted_content'] }, result => {
+        const calls = result.output?.filter(item => item.type === 'function_call') || [];
+        if (calls.length !== 1 || calls[0].name !== 'apply_training_turn' || (calls[0].status && calls[0].status !== 'completed') || typeof calls[0].call_id !== 'string' || !calls[0].call_id || typeof calls[0].arguments !== 'string' || calls[0].arguments.length > 50000) throw error('INVALID_TOOL_CALL', 'A interpretação não apresentou uma operação válida de turno.');
+        let args;
+        try { args = JSON.parse(calls[0].arguments); } catch { throw error('INVALID_TOOL_CALL', 'A interpretação não apresentou argumentos válidos.'); }
+        validateInterpretation(args, intentKeys, text);
+        return { args, callId: calls[0].call_id, output: result.output };
+      }, sequences[0]);
+      let result;
+      try { result = await executeTurn('apply_training_turn', structuredClone(planned.args)); }
+      catch (cause) { if (cause instanceof AppError) throw cause; throw error('MODEL_TOOL_FAILED', 'Não foi possível projetar o turno. Sua sessão foi preservada.'); }
+      if (!result?.candidate || result.validation?.valid !== true || !result.responseContext || typeof result.responseContext !== 'object' || Array.isArray(result.responseContext)) throw error('INVALID_TOOL_RESULT', 'O turno não produziu um estado válido para responder.');
+      const confirmed = structuredClone(result);
+      const narrated = await request('professional_turn_reply', { instructions: TURN_REPLY_INSTRUCTIONS, input: [...input, ...planned.output, { type: 'function_call_output', call_id: planned.callId, output: JSON.stringify(confirmed) }, { role: 'developer', content: [{ type: 'input_text', text: TURN_SPEAKER_REMINDER }] }], tools, tool_choice: 'none', parallel_tool_calls: false, text: format('professional_turn_reply', turnReplySchema) }, response => validateTurnReply(parseOutput(response)), sequences[1]);
+      return { ...planned.args, reply: narrated.reply, turnTool: { name: 'apply_training_turn', status: 'validated' } };
     },
     async assess(session) {
       checkSession(session);
@@ -104,7 +126,7 @@ export function createProvider({ apiKey = process.env.OPENAI_API_KEY, model = pr
       const revisionTexts = history.map(item => item?.requestText ?? item?.text).filter(item => typeof item === 'string');
       if (revisionText) revisionTexts.push(revisionText);
       const sequences = budget.reserveMany(2, maxOutputTokens);
-      const input = inputData({ text, policyText, currentDraft, revisionText, operation });
+      const input = inputData({ text, policyText, currentDraft, revisionText, operation, roleContract: ROLE_CONTRACT });
       const tools = [{ type: 'function', name: 'compose_exercise', description: 'Compor ou revisar um exercício de assistência e validar fatos, regras, documentos e finais. Não publica nem cria sessões. Use create sem rascunho existente e revise com rascunho existente.', strict: true, parameters: authorToolSchema }];
       const planned = await request('professional_author_tool', { instructions: DRAFT_INSTRUCTIONS, input, tools, tool_choice: 'required', parallel_tool_calls: false, include: ['reasoning.encrypted_content'] }, result => {
         const calls = result.output?.filter(item => item.type === 'function_call') || [];

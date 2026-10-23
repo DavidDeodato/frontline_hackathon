@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 import { openStore, hash } from './store.mjs';
 import { createProvider } from './provider.mjs';
 import { applyDraftProposal, createDraftToolExecutor } from './drafts.mjs';
+import { createTurnToolExecutor } from './turns.mjs';
 import { IntegrationError, integrationCapabilities, createSessionExport, verifySessionExport } from './integrations/index.mjs';
 import { AppError, fail, baseScenario, projectRules, validateScenario, newSession, wireSession, clone, openDocument, applyTurn, finishAssessment } from './engine.mjs';
 
@@ -140,7 +141,10 @@ export function createApp({ databasePath = fileURLToPath(new URL('../data/frontl
               const text = textField(body.text, 'Resposta', 2000);
               if (before.status !== 'active' || before.messages.filter(m => m.role === 'user').length >= 3) fail(409, 'SESSION_NOT_ACTIVE', 'A sessão não aceita mais respostas.', wireSession(before));
               if (before.mode !== provider.mode) fail(503, 'PROVIDER_MODE_CHANGED', 'Retome esta sessão com o mesmo modo de interpretação.', wireSession(before));
-              after = applyTurn(before, text, await provider.turn(before, text));
+              if (before.mode === 'openai') {
+                const tool = createTurnToolExecutor(before,text);
+                after = tool.finish(await provider.turn(clone(before),text,{executeTurn:tool.executeTurn}));
+              } else after = applyTurn(before,text,await provider.turn(before,text));
               if (['completed', 'incomplete'].includes(after.status)) {
                 try { finishAssessment(after, await provider.assess(after)); }
                 catch (error) { after.assessmentError = { code: error instanceof AppError ? error.code : 'MODEL_UNAVAILABLE', message: error instanceof AppError ? error.message : 'A conversa foi salva. Não foi possível avaliar agora; tente novamente.' }; }

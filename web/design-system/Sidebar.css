@@ -1,0 +1,57 @@
+.app-shell.frontline-shell{grid-template-columns:var(--sidebar-width) minmax(0,1fr);transition:grid-template-columns 220ms cubic-bezier(.2,.7,.3,1)}
+.frontline-shell .refined-sidebar{padding:25px 14px 20px;background:#161c22;border-right:1px solid #2a343e;z-index:45;align-items:stretch}
+.refined-sidebar .sidebar-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px;margin:0 5px 39px}
+.refined-sidebar .brand{padding:0 7px;margin:0;font-size:27px;align-self:center;white-space:nowrap;transition:opacity 160ms}
+.refined-sidebar .brand:hover:not(:disabled){opacity:.8}
+.refined-sidebar .sidebar-toggle{display:flex;align-items:center;justify-content:center;flex:none;width:30px;height:30px;border:1px solid #35424c;border-radius:8px;background:#1d272e;color:#aebdc8;transition:background 160ms,color 160ms,border-color 160ms,transform 160ms}
+.refined-sidebar .sidebar-toggle:hover{background:#283b43;color:#6de5ed;border-color:#47707a;transform:translateX(-1px)}
+.refined-sidebar .sidebar-toggle:focus-visible,.refined-sidebar .nav-item:focus-visible{outline:2px solid #69e3eb;outline-offset:3px}
+.refined-sidebar .workspace-label{display:flex;align-items:center;gap:8px;padding:0 13px;margin-bottom:14px;font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:#98a8b5;white-space:nowrap}
+.refined-sidebar .workspace-label>span{width:12px;height:1px;background:#5b707c;flex:none}
+.refined-sidebar nav{display:flex;flex-direction:column;gap:8px;width:100%}
+.refined-sidebar .nav-item{position:relative;gap:11px;min-height:52px;padding:8px 10px;border:1px solid transparent;border-radius:11px;color:#adbdc9;background:transparent;overflow:visible;transition:background 170ms,border-color 170ms,color 170ms,transform 170ms,box-shadow 170ms}
+.refined-sidebar .nav-item .sidebar-nav-icon{display:flex;align-items:center;justify-content:center;width:32px;height:32px;flex:none;border-radius:8px;background:#ffffff04;transition:background 170ms,transform 170ms,color 170ms}
+.refined-sidebar .nav-item .sidebar-nav-label{display:block;white-space:nowrap;font-size:13px;font-weight:550;letter-spacing:.05px}
+.refined-sidebar .nav-item .sidebar-nav-arrow{margin-left:auto;opacity:0;transform:translateX(-4px);transition:opacity 170ms,transform 170ms}
+.refined-sidebar .nav-item:hover:not(:disabled){background:#232e37;border-color:#34434e;color:#f6f9fb;transform:translateX(2px)}
+.refined-sidebar .nav-item:hover:not(:disabled) .sidebar-nav-icon{background:#ffffff09;transform:translateY(-1px)}
+.refined-sidebar .nav-item:hover:not(:disabled) .sidebar-nav-arrow,.refined-sidebar .nav-item:focus-visible .sidebar-nav-arrow{opacity:.65;transform:translateX(0)}
+.refined-sidebar .nav-item.active{background:#233b42;border-color:#365963;color:#72e7ee;box-shadow:inset 0 1px 0 #ffffff06,0 4px 12px #00000010}
+.refined-sidebar .nav-item.active::before{content:"";position:absolute;left:-7px;top:16px;bottom:16px;width:3px;border-radius:3px;background:#37cfdb;box-shadow:0 0 8px #37cfdb35}
+.refined-sidebar .nav-item.active .sidebar-nav-icon{color:#76ecf2;background:#37cfdb14}
+.refined-sidebar .nav-item.active .sidebar-nav-arrow{opacity:.7;transform:none}
+.refined-sidebar .sidebar-bottom{display:block;padding:0 10px;margin-top:auto}
+.refined-sidebar .sidebar-rule{background:#2e3c46;margin:28px 0 20px}
+.refined-sidebar .user-profile{margin-top:0;gap:11px;min-height:40px}
+.refined-sidebar .avatar.participant{width:35px;height:35px;background:#25464c;color:#76e4ec;border:1px solid #37616b;font-size:12px;box-shadow:0 0 0 4px #ffffff03}
+.refined-sidebar .sidebar-profile-copy{min-width:0;white-space:nowrap}
+.refined-sidebar .user-profile strong{font-size:11px;letter-spacing:.1px}
+.refined-sidebar .user-profile span{font-size:9px;color:#8e9fae}
+@media(min-width:761px){
+ .frontline-shell:not(.is-sidebar-collapsed) .refined-sidebar .brand-wordmark{display:block}
+ .frontline-shell:not(.is-sidebar-collapsed) .refined-sidebar .brand-compact{display:none}
+ .frontline-shell.is-sidebar-collapsed .refined-sidebar{padding:24px 10px 20px}
+ .is-sidebar-collapsed .refined-sidebar .sidebar-heading{flex-direction:column;gap:18px;margin:0 0 24px}
+ .is-sidebar-collapsed .refined-sidebar .brand{padding:0;font-size:29px}
+ .is-sidebar-collapsed .refined-sidebar .brand-wordmark{display:none}
+ .is-sidebar-collapsed .refined-sidebar .brand-compact{display:block}
+ .is-sidebar-collapsed .refined-sidebar .workspace-label,.is-sidebar-collapsed .refined-sidebar .sidebar-nav-label,.is-sidebar-collapsed .refined-sidebar .sidebar-nav-arrow,.is-sidebar-collapsed .refined-sidebar .sidebar-profile-copy{display:none}
+ .is-sidebar-collapsed .refined-sidebar .nav-item{padding:8px;justify-content:center}
+ .is-sidebar-collapsed .refined-sidebar .nav-item.active::before{left:-6px}
+ .is-sidebar-collapsed .refined-sidebar .sidebar-bottom{padding:0}
+ .is-sidebar-collapsed .refined-sidebar .user-profile{justify-content:center}
+ .is-sidebar-collapsed .refined-sidebar .nav-item::after{content:attr(data-tooltip);position:absolute;left:calc(100% + 15px);top:50%;transform:translate(-4px,-50%);opacity:0;visibility:hidden;pointer-events:none;padding:9px 12px;border:1px solid #394955;border-radius:8px;background:#1d2933;color:#edf6fa;box-shadow:0 6px 20px #0003;font-size:12px;font-weight:500;white-space:nowrap;transition:opacity 140ms,transform 140ms,visibility 140ms;z-index:60}
+ .is-sidebar-collapsed .refined-sidebar .nav-item:hover::after,.is-sidebar-collapsed .refined-sidebar .nav-item:focus-visible::after{opacity:1;visibility:visible;transform:translate(0,-50%)}
+}
+@media(max-width:760px){
+ .frontline-shell .refined-sidebar{height:64px;flex-direction:row;align-items:center;padding:0 20px;border-right:0}
+ .refined-sidebar .sidebar-heading{margin:0;min-height:0}
+ .refined-sidebar .brand{padding:0;font-size:25px}
+ .refined-sidebar .sidebar-toggle,.refined-sidebar .workspace-label,.refined-sidebar .sidebar-bottom{display:none}
+ .refined-sidebar nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;width:100%;padding:7px 10px max(9px,env(safe-area-inset-bottom))}
+ .refined-sidebar .nav-item{flex-direction:column;justify-content:center;gap:3px;min-height:55px;padding:5px 3px;border-radius:9px}
+ .refined-sidebar .nav-item .sidebar-nav-icon{width:25px;height:25px;background:transparent}
+ .refined-sidebar .nav-item .sidebar-nav-label{font-size:10px}
+ .refined-sidebar .nav-item .sidebar-nav-arrow,.refined-sidebar .nav-item.active::before{display:none}
+ .refined-sidebar .nav-item:hover:not(:disabled){transform:none}
+}

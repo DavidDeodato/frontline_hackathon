@@ -58,11 +58,11 @@ function updateAutonomy(s) { s.attributes.autonomia = !s.documentsRead.includes(
 // This classifier exists ONLY for explicitly labelled fixture mode and deterministic tests.
 export function fixtureIntent(s, text) {
   const t = text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
-  const unknown = /nao.{0,30}(confirm|prazo|garant)|sem.{0,18}(confirm|prazo)|desconhecid|ainda.{0,20}confirm/.test(t);
+  const unknown = /nao.{0,30}(confirm|prazo|garant)|sem.{0,18}(confirm|prazo|garant)|desconhecid|ainda.{0,20}confirm/.test(t);
   const withdrawLoan = /(?:nao|nunca|sem|cancel|retiro|desist)[^.!?;]{0,35}(?:emprest|provisor|reserv|acordo)|(?:emprest|provisor|acordo)[^.!?;]{0,25}(?:cancelad|retirad)/.test(t);
   const withdrawNextStep = /(?:nao|nunca|cancel|retiro)[^.!?;]{0,30}(?:avis|atualiza|contato|acompanh|retorno)/.test(t);
   const loan = /provisor|emprest|alternativ/.test(t) && !withdrawLoan;
-  const promise = /garant|pode contar|pronto.{0,15}amanha|entreg.{0,15}amanha/.test(t) && !/nao.{0,25}garant|nao posso|nao podemos|sem garantia|posso garantir\?|sera que/.test(t) && (!loan || /repar|consert|pronto|peca/.test(t));
+  const promise = t.split(/[.!;]|\b(?:mas|porem)\b/).some(part => /garant|pode contar|pronto.{0,15}amanha|entreg.{0,15}amanha/.test(part) && !/nao.{0,25}garant|nao posso|nao podemos|sem garant(?:ia|ir)|posso garantir\?|sera que/.test(part) && (!loan || /repar|consert|pronto|peca/.test(part)));
   return {
     acknowledgesNeed: /entend|urgenc|viag|necess|comunic|ajud/.test(t), explainsUnknownEta: unknown,
     unsupportedPromise: promise, explicitRetraction: unknown && /corrig|retiro|desculp|nao posso garantir|nao podemos garantir/.test(t),
@@ -77,7 +77,7 @@ export function validateIntent(intent) {
   if (!intent || typeof intent !== 'object' || Array.isArray(intent) || intentKeys.some(k => typeof intent[k] !== 'boolean') || Object.keys(intent).some(k => !intentKeys.includes(k))) fail(503, 'INVALID_MODEL_OUTPUT', 'O modelo retornou uma interpretação inválida; sua resposta foi preservada para tentar novamente.');
   return intent;
 }
-export function applyTurn(session, text, interpretation) {
+export function projectTurn(session, text, interpretation) {
   const s = clone(session); const state = s._state; const i = { ...validateIntent(interpretation?.intent) };
   if (typeof text !== 'string' || !text.trim() || text.length > 2000) fail(422, 'INVALID_INPUT', 'Resposta deve conter de 1 a 2000 caracteres.');
   if (s.status !== 'active') fail(409, 'SESSION_NOT_ACTIVE', 'Retome uma sessão ativa para responder.', wireSession(s));
@@ -87,7 +87,6 @@ export function applyTurn(session, text, interpretation) {
   // model interpretation, with literal evidence, and applies domain guards here.
   if (s.mode === 'openai') {
     for (const key of intentKeys) if (i[key] && (typeof interpretation.evidence?.[key] !== 'string' || !interpretation.evidence[key].trim() || !text.includes(interpretation.evidence[key]))) fail(503, 'INVALID_INTENT_EVIDENCE', 'A interpretação não citou sua fala literalmente; tente novamente.', wireSession(session));
-    if (typeof interpretation.reply !== 'string' || !interpretation.reply.trim() || interpretation.reply.length > 900) fail(503, 'INVALID_MODEL_OUTPUT', 'O personagem não produziu uma resposta válida; tente novamente.', wireSession(session));
   }
   const couldAgreeBeforeReply = state.identity && state.returnConfirmed && s.documentsRead.includes('OBJ-POLITICA') && state.loanOffered;
   const user = addMessage(s, 'user', text); state.signals.push({ messageId: user.id, ...i });
@@ -110,8 +109,8 @@ export function applyTurn(session, text, interpretation) {
     else if (i.offerLoan && !state.unsupported && !state.loanAgreed && !state.nextStep) s.commitment = { status: 'draft', text: s.scenario.rules.loanAvailable ? 'Aparelho provisório · confirmar condições antes do acordo' : 'Empréstimo indisponível nesta configuração', sourceMessageId: user.id };
     if (i.explicitRetraction && !state.unsupported && s.commitment.status === 'unsupported') s.commitment = { status: 'none', text: 'Promessa retirada; próximo passo ainda não combinado', sourceMessageId: user.id };
   }
-  // The character can phrase a contextual response. The authoritative factual
-  // acknowledgement is always appended from the resulting server state.
+  // Consequences are authoritative in commitment, attributes and ending. They
+  // must not be appended as a second scripted voice to the model's character.
   if (count === 2) {
     const endingId = state.unsupported ? 'END-03' : state.loanAgreed ? 'END-01' : state.nextStep ? 'END-02' : null;
     s.ending = endingId ? clone(s.scenario.graph.endings.find(e => e.id === endingId)) : null;
@@ -120,8 +119,35 @@ export function applyTurn(session, text, interpretation) {
     if (endingId === 'END-02') s.commitment = { status: 'valid', text: 'Atualização combinada, sem promessa de reparo', sourceMessageId: state.nextStepMessageId || s.commitment.sourceMessageId };
     npc = endingId === 'END-03' ? 'Vou me organizar contando com essa entrega.' : endingId === 'END-01' ? 'Com o provisório consigo viajar. Vou devolver dentro do prazo combinado.' : endingId === 'END-02' ? 'Vou aguardar a atualização. Entendi que o reparo ainda não tem prazo garantido.' : 'Ainda não ficou claro com o que posso contar. Vamos encerrar esta tentativa sem um acordo.';
   }
-  addMessage(s, 'npc', s.mode === 'openai' ? `${interpretation.reply.trim()}\n\n${npc}` : npc);
+  const loanRejectionReasons = [];
+  if (!state.loanAgreed) {
+    if (!s.scenario.rules.loanAvailable) loanRejectionReasons.push('loan_unavailable');
+    if (!s.documentsRead.includes('OBJ-POLITICA')) loanRejectionReasons.push('policy_not_read');
+    if (!couldAgreeBeforeReply) loanRejectionReasons.push('conditions_not_confirmed_in_previous_turn');
+    if (state.unsupported) loanRejectionReasons.push('unsupported_repair_promise');
+    if (i.ambiguous) loanRejectionReasons.push('ambiguous_user_action');
+    if (!i.confirmLoan) loanRejectionReasons.push('no_explicit_loan_agreement');
+  }
+  const responseContext = {
+    status:s.status, attributes:clone(s.attributes), commitment:clone(s.commitment), ending:clone(s.ending),
+    confirmedState:{identity:state.identity,returnConfirmed:state.returnConfirmed,loanOffered:state.loanOffered,loanAgreed:state.loanAgreed,nextStep:state.nextStep,unsupported:state.unsupported},
+    allowedFacts:{confirmIdentity:!i.ambiguous && i.askIdentity && state.identity,confirmReturn:!i.ambiguous && i.askReturn && state.returnConfirmed,acceptLoan:state.loanAgreed,acceptUpdate:state.nextStep && !state.unsupported,repairConfirmed:false},
+    loanRejectionReasons,
+    deniedTransitions:i.confirmLoan && !state.loanAgreed ? [{action:'loan_agreement',reasons:loanRejectionReasons}] : [],
+    remainingUserTurns:2-count,
+    limits:{clientReturnDate:'2026-10-27',loanDays:s.scenario.rules.loanDays,repairEta:null}
+  };
+  return {candidate:s,fixtureReply:npc,responseContext};
+}
+export function finalizeTurn(projection, reply) {
+  const s=clone(projection.candidate);
+  if (s.messages.at(-1)?.role !== 'user' || s.messages.length > 6) fail(500,'INVALID_TURN_PROJECTION','A projeção do turno não está pronta para receber uma resposta.');
+  if (s.mode === 'openai' && (typeof reply !== 'string' || !reply.trim() || reply.length > 900)) fail(503,'INVALID_MODEL_OUTPUT','O personagem não produziu uma resposta válida; tente novamente.');
+  addMessage(s,'npc',s.mode === 'openai' ? reply.trim() : projection.fixtureReply);
   return s;
+}
+export function applyTurn(session,text,interpretation) {
+  return finalizeTurn(projectTurn(session,text,interpretation),interpretation?.reply);
 }
 export function fixtureAssessment(s) {
   const sig = s._state.signals; const users = s.messages.filter(m => m.role === 'user');

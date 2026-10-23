@@ -5,7 +5,8 @@ export const RUN_LIMITS = Object.freeze({ requests: 6, outputTokens: 8000, perRe
 // Reserve synchronously before fetch, including failures and ambiguous outcomes.
 // On restart the manager must restore the snapshot, not create a new allowance.
 export function createRequestBudget({ maxRequests = RUN_LIMITS.requests, maxOutputTokens = RUN_LIMITS.outputTokens, usedRequests = 0, reservedOutputTokens = 0, stopped = false } = {}) {
-  if (!Number.isInteger(maxRequests) || maxRequests < 0 || maxRequests > RUN_LIMITS.requests || !Number.isInteger(maxOutputTokens) || maxOutputTokens < 0 || maxOutputTokens > RUN_LIMITS.outputTokens || !Number.isInteger(usedRequests) || usedRequests < 0 || usedRequests > maxRequests || !Number.isInteger(reservedOutputTokens) || reservedOutputTokens < 0 || reservedOutputTokens > maxOutputTokens || typeof stopped !== 'boolean') throw new TypeError('Invalid bounded request budget.');
+  const explicitExtendedRound = maxRequests === 9 && maxOutputTokens === 11700;
+  if (!Number.isInteger(maxRequests) || maxRequests < 0 || (maxRequests > RUN_LIMITS.requests && !explicitExtendedRound) || !Number.isInteger(maxOutputTokens) || maxOutputTokens < 0 || (maxOutputTokens > RUN_LIMITS.outputTokens && !explicitExtendedRound) || !Number.isInteger(usedRequests) || usedRequests < 0 || usedRequests > maxRequests || !Number.isInteger(reservedOutputTokens) || reservedOutputTokens < 0 || reservedOutputTokens > maxOutputTokens || typeof stopped !== 'boolean') throw new TypeError('Invalid bounded request budget.');
   let requests = usedRequests, reserved = reservedOutputTokens, halted = stopped;
   function reserveMany(count, tokens) {
     if (!Number.isInteger(count) || count < 1 || !Number.isInteger(tokens) || tokens < 16) throw new TypeError('Invalid output token reservation.');

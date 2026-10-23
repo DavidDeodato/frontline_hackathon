@@ -4,6 +4,7 @@ import { api, uid } from './api.js';
 import { Library, Preparation, ScenarioReview, Practice, Review, Comparison, Channels, Continuity, Record } from './Surfaces.jsx';
 import FioGuide from './mascot/FioGuide.jsx';
 import { AsyncState, StatusBadge } from './design-system/Components.jsx';
+import Sidebar from './design-system/Sidebar.jsx';
 const complete = s => ['completed', 'incomplete', 'cancelled'].includes(s?.status);
 const titles = {
   library: 'Biblioteca',
@@ -38,6 +39,16 @@ function Surface({
   return <Component {...props} />;
 }
 export default function App() {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      const saved = localStorage.getItem('frontline.sidebar.collapsed');
+      if (saved !== null) return saved === 'true';
+    } catch { /* Navigation remains usable when storage is unavailable. */ }
+    return window.matchMedia('(min-width: 761px) and (max-width: 1150px)').matches;
+  });
+  useEffect(() => {
+    try { localStorage.setItem('frontline.sidebar.collapsed', String(sidebarCollapsed)); } catch {}
+  }, [sidebarCollapsed]);
   const [route, setRoute] = useState(readRoute),
     [library, setLibrary] = useState({
       scenarios: [],
@@ -314,7 +325,8 @@ export default function App() {
     refreshQuiet();
   };
   const selectedSession = session || library.sessions.find(item => item.status === 'paused') || library.sessions[0] || null;
-  const resume = () => selectedSession ? open(selectedSession.id, 'practice') : navigate('library');
+  const resume = () => selectedSession ? open(selectedSession.id) : navigate('library');
+  const openHistory = () => selectedSession ? open(selectedSession.id, 'practice') : navigate('library');
   const showRecord = () => session && navigate('record', session.id),
     showReview = id => id ? open(id, 'review') : session && navigate('review', session.id);
   const sections = [{
@@ -339,17 +351,12 @@ export default function App() {
     active: ['records', 'record'].includes(view)
   }];
   const missingSession = ['practice', 'review', 'record'].includes(view) && (!session || route.id && session.id !== route.id);
-  return <div className="app-shell">
+  return <div className={`app-shell frontline-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}`} style={{ '--sidebar-width': sidebarCollapsed ? '80px' : '244px' }}>
   <a className="skip-link" href="#main-content" onClick={e => {
       e.preventDefault();
       content.current?.focus();
     }}>Pular para o conteúdo</a>
-  <aside className="sidebar" aria-label="Seu espaço Frontline"><button className="brand" onClick={home} disabled={busy} aria-label="Frontline — biblioteca"><span className="brand-wordmark">Frontline<span className="brand-period">.</span></span><span className="brand-compact" aria-hidden="true">F<span>.</span></span></button><span className="workspace-label">ESPAÇO DE PRÁTICA</span><nav aria-label="Navegação principal">{sections.map(({
-          id,
-          label,
-          Icon,
-          active
-        }) => <button key={id} className={`nav-item${active ? ' active' : ''}`} onClick={() => id === 'library' ? home() : navigate(id)} disabled={busy} aria-current={active ? 'page' : undefined} title={label}><Icon size={20} /><span>{label}</span></button>)}</nav><div className="sidebar-bottom"><div className="sidebar-rule" /><p>Uma conversa.<br />Novas possibilidades.</p><div className="user-profile"><div className="avatar participant" aria-hidden="true">M</div><div><strong>Mariana Oliveira</strong><span>Participante do exercício</span></div></div></div></aside>
+  <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(value => !value)} sections={sections} onNavigate={id => id === 'library' ? home() : navigate(id)} onHome={home} busy={busy} />
   <main className="main" ref={content} id="main-content" tabIndex={-1} aria-busy={busy || loading || sessionLoading}>
    <header className="topbar"><div className="breadcrumb"><span>Seu espaço</span><span aria-hidden="true">/</span><strong>{titles[view]}</strong></div><div className="topbar-meta">{health && <StatusBadge tone="neutral">{health.providerMode === 'openai' ? 'Conversa com IA' : 'Modo demonstração'}</StatusBadge>}<span className="simulation-label">Dados fictícios</span></div></header>
    {!online && <div className="notice" role="status"><WifiOff size={18} /><span>Sem conexão. Os envios ficam indisponíveis até a reconexão.</span></div>}
@@ -376,7 +383,7 @@ export default function App() {
     {view === 'review' && session && <Surface name="Review" session={session} sessions={library.sessions} comparison={comparison} busy={busy} onBranch={() => command('branches')} onRetry={() => command('assessment/retry')} onCompare={compare} onExport={showRecord} onOpen={id => open(id)} onConversation={() => navigate('practice', session.id)} />}
     {view === 'compare' && (comparison ? <Surface name="Comparison" comparison={comparison} busy={busy} onBranch={() => command('branches')} onOpen={id => open(id, 'review')} onReview={id => open(id, 'review')} onExport={showRecord} /> : <AsyncState title="Selecione duas tentativas" action={<button className="primary" onClick={home}>Abrir biblioteca</button>} />)}
     {view === 'channels' && <Surface name="Channels" session={selectedSession} onResume={resume} onContinuity={() => navigate('continuity', selectedSession?.id)} />}
-    {view === 'continuity' && <Surface name="Continuity" session={selectedSession} busy={busy} onResume={resume} onOpen={resume} onChannels={() => navigate('channels')} />}
+    {view === 'continuity' && <Surface name="Continuity" session={selectedSession} busy={busy} onResume={resume} onOpen={openHistory} onChannels={() => navigate('channels')} />}
     {view === 'record' && session && <Surface name="Record" session={session} busy={busy} onBack={() => showReview()} onReview={() => showReview()} />}
    </>}
   </main>

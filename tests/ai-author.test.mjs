@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createProvider, createRequestBudget } from '../server/provider.mjs';
 import { createDraftToolExecutor } from '../server/drafts.mjs';
+import { createTurnToolExecutor } from '../server/turns.mjs';
 import { baseScenario, newSession, openDocument, applyTurn, finishAssessment, intentKeys } from '../server/engine.mjs';
 
 // Synthetic transport, real provider and domain tool. No credentials or network.
@@ -103,6 +104,18 @@ test('invalid tool result and internal errors cannot be passed to the model as s
   }
 });
 
+for (const fieldPath of ['compatibility.sourceQuote', 'contextualFacts[0].sourceQuote']) test(`author reports ${fieldPath} failure without raw source data`, async () => {
+  const value = proposal(), rejectedQuote = 'Paráfrase sintética privada da necessidade do cliente.';
+  if (fieldPath.startsWith('compatibility')) value.compatibility.sourceQuote = rejectedQuote;
+  else value.contextualFacts[0].sourceQuote = rejectedQuote;
+  const { provider, requests } = authorProvider({ planned: call(value) }); let effects = 0;
+  await assert.rejects(provider.draft(context, policy, { executeTool: async () => { effects++; } }), { code: 'INVALID_CONTEXT_EVIDENCE' });
+  assert.equal(effects, 0); assert.equal(requests.length, 1);
+  assert.deepEqual(provider.getTelemetry()[0].validation, { fieldPath, reason: 'not_literal_substring' });
+  const diagnostic = JSON.stringify(provider.getTelemetry());
+  for (const secret of [rejectedQuote, context, policy, 'synthetic-key']) assert.ok(!diagnostic.includes(secret));
+});
+
 test('reasoning items accompany the function result without entering telemetry', async () => {
   const reasoning = { type: 'reasoning', id: 'rs_synthetic', encrypted_content: 'synthetic-opaque-content', summary: [] };
   const { provider, requests } = authorProvider({ planned: [reasoning, call()] });
@@ -144,22 +157,28 @@ for (const available of [true, false]) test(`provider and engine preserve contex
     ['Pode seguir com a cessão temporária nos termos que acabamos de acertar.', ['confirmLoan']]
   ];
   let stage = 0;
-  const provider = createProvider({ apiKey: 'synthetic-key', model: 'synthetic-model', budget: createRequestBudget(), fetchImpl: async (_, request) => {
+  const provider = createProvider({ apiKey: 'synthetic-key', model: 'synthetic-model', budget: createRequestBudget({ maxRequests: 9, maxOutputTokens: 11700 }), fetchImpl: async (_, request) => {
     const body = JSON.parse(request.body), data = JSON.parse(body.input[0].content[0].text);
-    if (stage < 3) {
+    if (body.tool_choice === 'none') return jsonResponse(messageOutput({ reply: available ? 'Os mapas e o contato fazem diferença na minha viagem.' : 'Sem provisório, preciso saber qual atualização posso esperar.' }));
+    if (body.tool_choice === 'required') {
       const [speech, selected] = speeches[stage++]; assert.equal(data.lastUserText, speech);
       assert.deepEqual(data.history, current.messages);
-      return jsonResponse(messageOutput({ intent: Object.fromEntries(intentKeys.map(key => [key, selected.includes(key)])), evidence: Object.fromEntries(intentKeys.map(key => [key, selected.includes(key) ? speech : ''])), reply: available ? 'Os mapas e o contato fazem diferença na minha viagem.' : 'Sem provisório, preciso saber qual atualização posso esperar.' }));
+      return jsonResponse([{ type: 'function_call', name: 'apply_training_turn', call_id: `turn-${stage}`, arguments: JSON.stringify({ intent: Object.fromEntries(intentKeys.map(key => [key, selected.includes(key)])), evidence: Object.fromEntries(intentKeys.map(key => [key, selected.includes(key) ? speech : ''])) }) }]);
     }
     const user = current.messages.find(message => message.role === 'user');
     return jsonResponse(messageOutput({ criteria: current.scenario.rubric.criteria.map(criterion => ({ criterionId: criterion.id, name: criterion.name, rating: 'parcialmente observado', quote: user.text, messageId: user.id, reason: 'Evidência sintética para testar o vínculo literal da avaliação.' })), opportunity: 'Confira as condições antes de combinar o próximo passo.' }));
   } });
-  for (const [speech] of speeches) current = applyTurn(current, speech, await provider.turn(current, speech));
+  for (const [speech] of speeches) {
+    const executor = createTurnToolExecutor(current, speech);
+    const interpretation = await provider.turn(current, speech, { executeTurn: executor.executeTurn });
+    current = executor.finish(interpretation);
+    assert.equal(current.messages.at(-1).text, interpretation.reply);
+  }
   assert.equal(current.status, available ? 'completed' : 'incomplete');
   assert.equal(current.ending?.id ?? null, available ? 'END-01' : null);
   assert.ok(current.messages.some(message => message.role === 'npc' && message.text.includes(available ? 'Os mapas e o contato' : 'Sem provisório')));
   const finished = finishAssessment(current, await provider.assess(current));
   assert.equal(finished.messages.length, 8); assert.equal(finished.evaluation.criteria.length, 3);
   for (const criterion of finished.evaluation.criteria) assert.ok(finished.messages.find(message => message.role === 'user' && message.id === criterion.messageId)?.text.includes(criterion.quote));
-  assert.equal(provider.getBudget().usedRequests, 4);
+  assert.equal(provider.getBudget().usedRequests, 7);
 });

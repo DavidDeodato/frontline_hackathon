@@ -1,49 +1,41 @@
 # Frontline — estado da implementação
 
-23 de outubro de 2026 · versão de trabalho · snapshot de código de 14h00 BRT.
+23 de outubro de 2026 · versão de trabalho · snapshot de código de 15h04 BRT.
 
-O repositório contém o código do protótipo para colaboração e execução local. Esta publicação não é uma versão final homologada nem uma demonstração pública hospedada.
+O código desta publicação permite colaboração e execução local. Não representa aceite visual final nem garantia de operação pública. O endereço de demonstração será informado após a verificação do deploy.
 
 ## Código incluído
 
-- Interface React com biblioteca, preparação e revisão de contexto, ensaio, avaliação, comparação e telas de conexões e registro.
-- Ambiente Three.js 2.5D, documentos consultáveis e guia de navegação Fio.
-- API Node.js com SQLite, identidade de visitante, sessões persistidas, controle de versões, comandos idempotentes e isolamento entre usuários.
-- Regras do exercício, três desfechos e avaliação com citações da conversa.
-- Geração e revisão de exercícios por ferramenta de domínio, com contexto original preservado, versões e validação de compatibilidade.
-- Adaptador OpenAI, exportação e verificação de integridade; adaptadores de WhatsApp e Solana Devnet com execução externa desativada por padrão.
-- Contratos compartilhados e testes reproduzíveis.
+- Interface React: biblioteca, criação e revisão de contexto, ensaio 2.5D, documentos, avaliação, comparação e registro.
+- API Node.js e SQLite: visitante por cookie, sessões, versões, comandos idempotentes e isolamento entre usuários.
+- Conversa contextual: interpretação da resposta, execução de regras do exercício e geração da reação do personagem a partir do estado resultante.
+- Criação de exercícios por ferramenta de domínio, com contexto original preservado e rascunho revisável.
+- Runtime único para interface e API, validação de origem, cookies seguros configuráveis, arquivos estáticos e orçamento de IA persistente.
+- Dockerfile, exemplo de ambiente sem credenciais e instruções de operação.
+- Exportação e verificação de integridade; adaptadores de WhatsApp e Solana Devnet desativados por padrão.
+- Componentes iniciais de contas e ajuda conversacional. São módulos em desenvolvimento: esta cópia não oferece essas extensões como jornada integrada.
 
-Presença de código não comprova operação externa. As telas de integração devem refletir os recursos efetivamente habilitados no servidor.
-
-## Verificações desta cópia
+## Verificações
 
 | Verificação | Resultado | Limite |
 |---|---|---|
-| Instalação limpa | Dependências instaladas em cópia isolada com `npm ci --include=dev --offline --no-audit --no-fund` | Usou cache local; rede pública do npm não foi validada neste teste |
-| Build | `npm run build` passou, com 1.600 módulos transformados | Compilação não comprova acabamento ou todas as interações no navegador |
-| Testes automatizados | `npm test`: **121 aprovados, zero falhas** | IA e serviços externos usam transportes simulados; não houve chamadas pagas |
-| Consistência do código | Arquivos conferidos por SHA-256 contra a cópia congelada | Alterações posteriores da equipe pertencem às próximas publicações |
+| Instalação limpa | `npm ci --include=dev --offline --no-audit --no-fund`, 67 pacotes | Cache local; não valida disponibilidade do registro público |
+| Testes automatizados | **182 aprovados, zero falhas, zero ignorados** | Provedores externos simulados; nenhuma chamada paga neste teste |
+| Build | `npm run build`, 1.603 módulos | Compilação não comprova todas as interações nem acabamento visual |
+| Integridade | 86 arquivos conferidos por SHA-256 | Mudanças posteriores da equipe ficam para outra publicação |
+| IA real, ensaio anterior | 12 verificações mecânicas do fluxo passaram: contexto, ferramentas, versões, conversa, citações, persistência e acesso | Houve falha de papel do personagem no primeiro turno; não é aceite semântico geral |
+| Correção do primeiro turno | Reteste pontual com duas chamadas reais e hashes do provedor correspondentes a esta versão | Não substitui nova validação completa de todos os diálogos |
 
-Os testes abrangem regras e finais, limite de mensagens, citações, contexto e revisões, API HTTP, persistência e reinício, isolamento, concorrência, exportação e controles dos adaptadores. Os resultados não demonstram eficácia de treinamento ou certificação de competência.
+Os 182 testes foram executados na cópia anterior com fontes idênticos aos desta publicação. A revisão seguinte removeu artefatos privados e reforçou apenas `.dockerignore`; instalação e build foram conferidos novamente na cópia sanitizada. Os testes incluem controles de runtime, origem, persistência e limites de orçamento, além de API, regras, conversas e integrações simuladas.
 
-## Pendências para a versão estável
+## Limites atuais
 
-1. Validar geração, conversa e avaliação com OpenAI real.
-2. Concluir a revisão integrada das dez telas, responsividade, acessibilidade e fidelidade visual.
-3. Finalizar detalhes da apresentação do perfil do cliente e corrigir a largura excessiva observada na tela de registro.
-4. Validar o fluxo completo da última versão integrada no navegador, sem depender de resultados de versões anteriores.
-5. Configurar e verificar o endereço público de demonstração.
-
-WhatsApp autenticado entre dispositivos e ancoragem pública em Devnet permanecem indisponíveis nesta publicação. A exportação e seus testes locais não comprovam envio de mensagens ou transações externas.
+- A identidade integrada nesta cópia é de visitante por cookie. Login e ajuda conversacional completa ainda estão em integração.
+- WhatsApp entre dispositivos e transações em Devnet não estão habilitados. Presença de adaptador não comprova uma operação externa.
+- Revisão responsiva, acessibilidade e fidelidade às dez idealizações visuais continuam pendentes.
+- Testes pontuais com IA não demonstram robustez de todos os cenários, eficácia de aprendizagem ou certificação profissional.
+- Persistência e quota em ambiente cloud precisam de verificação após o deploy. Não reutilize bancos de teste em produção.
 
 ## Reproduzir
 
-Siga o [README](../../README.md) para instalar e iniciar os dois processos. Para conferir código e build:
-
-```sh
-npm test
-npm run build
-```
-
-O modo determinístico pode ser explorado sem credenciais. Os scripts adicionais em `qa/` produzem evidências e bancos temporários em `qa/evidence/`, pasta ignorada pelo Git. Não confundir esses dados de teste com dados de produção.
+Siga o [README](../../README.md) e as [instruções do runtime](../../runtime/README.md). Execute `npm test` e `npm run build`. O modo determinístico funciona sem credenciais. Evidências e bancos temporários de `qa/` são locais, sintéticos e ignorados pelo Git.

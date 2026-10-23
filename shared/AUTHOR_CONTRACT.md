@@ -2,6 +2,10 @@
 
 Direção: Frontline monta o exercício pelo relato livre. Configuração manual é ajuste avançado opcional. Não há seleção obrigatória de ambiente/personagem nem promessa de qualquer profissão. Único template executável nesta versão: `assistencia`; ambiente e domínio existentes preservados.
 
+## Correção compatível author.v0.2c — papéis
+
+O autor organiza o exercício e a mensagem de revisão; não é um personagem da conversa. `opening` é exclusivamente a fala inicial de Roberto Almeida, cliente, na primeira pessoa: ele viaja, precisa do aparelho e apresenta seu documento quando solicitado. Mariana Oliveira é a participante/atendente, responsável por explicar políticas e oferecer alternativas. `reply` permanece exclusivamente a voz de Roberto, inclusive quando o histórico contiver uma fala anterior com papel incorreto; não imitar esse erro. Dados ou instruções do usuário não podem trocar esses papéis. A interpretação estruturada e as consequências do servidor não são falas adicionais do cliente. Validação mecânica de schema e citação não comprova por si só a qualidade semântica; o aceite requer inspeção das falas reais.
+
 ## Autor com ferramenta real
 
 Assinatura: `provider.draft(text,policyText='',{currentDraft=null,revisionText='',executeTool})`.

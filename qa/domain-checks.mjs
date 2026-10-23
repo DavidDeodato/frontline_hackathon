@@ -23,6 +23,13 @@ function fixtureTurn(s,text){return e.applyTurn(s,text,{intent:e.fixtureIntent(s
 await check('QA-D01','Calendar consultation and reopening documents do not inflate preparation or messages',()=>{
  const s=session();e.openDocument(s,'OBJ-CALENDARIO');assert.equal(s.attributes.preparo,0);e.openDocument(s,'OBJ-ORDEM');e.openDocument(s,'OBJ-ORDEM');e.openDocument(s,'OBJ-POLITICA');e.openDocument(s,'OBJ-POLITICA');assert.equal(s.attributes.preparo,2);assert.equal(s.messages.length,1);assert.equal(s.attributes.autonomia,1);
 });
+await check('QA-D15','Fixture negation of a repair guarantee must not become an unsupported promise',()=>{
+ const s=session();
+ for(const text of ['Vou verificar o estoque e te atualizar hoje às 17h, sem garantir o reparo.','Vou atualizar você amanhã, sem garantir prazo de conserto.']){
+  const intent=e.fixtureIntent(s,text);assert.equal(intent.unsupportedPromise,false,`Negation misclassified: ${text}`);assert.equal(intent.nextStep,true);assert.equal(intent.explainsUnknownEta,true);
+ }
+ assert.equal(e.fixtureIntent(s,'Garanto que o reparo ficará pronto amanhã.').unsupportedPromise,true);
+});
 await check('QA-D02','A single participant turn cannot ask the conditions and already complete the loan',()=>{
  let s=session();e.openDocument(s,'OBJ-POLITICA');s=fixtureTurn(s,'Confirmo o empréstimo provisório: você tem documento e consegue devolver em sete dias?');assert.notEqual(s.commitment.status,'valid');assert.equal(s.attributes.autonomia,2);
 });
@@ -30,7 +37,13 @@ await check('QA-D03','A loan requires reading the policy even when model intents
  let s=session('openai');s=modelTurn(s,'Tem RG e consegue trazer o equipamento de volta no prazo?',{offerLoan:true,askIdentity:true,askReturn:true});s=modelTurn(s,'Fechamos a alternativa temporária.',{offerLoan:true,confirmLoan:true});assert.notEqual(s.commitment.status,'valid');
 });
 await check('QA-D04','Real-mode paraphrases are interpreted from structured intent and preserve contextual reply',()=>{
- let s=session('openai');e.openDocument(s,'OBJ-POLITICA');const text='Tem RG e consegue trazer o equipamento de volta até terça-feira?';const reply='Estou com meu RG e consigo voltar no dia 27; preciso ligar para minha filha.';s=modelTurn(s,text,{offerLoan:true,askIdentity:true,askReturn:true},reply);assert.equal(s.attributes.autonomia,2);assert.ok(s.messages.at(-1).text.includes(reply));
+ let s=session('openai');e.openDocument(s,'OBJ-POLITICA');const text='Tem RG e consegue trazer o equipamento de volta até terça-feira?';const reply='Estou com meu RG e consigo voltar no dia 27; preciso ligar para minha filha.';s=modelTurn(s,text,{offerLoan:true,askIdentity:true,askReturn:true},reply);assert.equal(s.attributes.autonomia,2);assert.equal(s.messages.at(-1).text,reply);
+});
+await check('QA-D16','OpenAI NPC reply remains exact across three turns without fixture append or extra messages',()=>{
+ let s=session('openai');e.openDocument(s,'OBJ-POLITICA');
+ const turns=[['A peça está sem prazo confirmado.',{explainsUnknownEta:true},'Entendi, mas preciso falar com minha família.'],['Tem documento e consegue devolver o aparelho provisório no prazo?',{offerLoan:true,askIdentity:true,askReturn:true},'Tenho meu documento e consigo devolver no dia 27.'],['Confirmo o empréstimo provisório nas condições combinadas.',{offerLoan:true,confirmLoan:true},'Obrigado. Vou usar o aparelho provisório na viagem.']];
+ for(const [text,intent,reply] of turns){s=modelTurn(s,text,intent,reply);assert.equal(s.messages.filter(m=>m.role==='npc').at(-1).text,reply);}
+ assert.equal(s.messages.length,7);e.finishAssessment(s,e.fixtureAssessment(s));assert.equal(s.messages.length,8);assert.equal(s.messages.filter(m=>m.role==='npc').length,4);assert.equal(s.messages.filter(m=>m.role==='user').length,3);assert.equal(s.ending.id,'END-01');
 });
 await check('QA-D05','Invented literal evidence cannot authorize a real-mode intent',()=>{
  const s=session('openai'),intent=flags({confirmLoan:true});assert.throws(()=>e.applyTurn(s,'Ainda preciso avaliar.',{intent,evidence:{confirmLoan:'Confirmo o empréstimo'},reply:'Entendi.'}),err=>err.status===503);

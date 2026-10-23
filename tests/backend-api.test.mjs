@@ -5,7 +5,7 @@ import {resolve} from 'node:path';
 import {randomUUID,createHash} from 'node:crypto';
 import {canonicalJSON} from '../server/integrations/export.mjs';
 import {createApp} from '../server/index.mjs';
-import {AppError, fixture, fixtureIntent, fixtureAssessment} from '../server/engine.mjs';
+import {AppError, fixture, fixtureIntent, fixtureAssessment, intentKeys} from '../server/engine.mjs';
 
 // All providers below are explicit offline doubles. No credentials or model calls.
 const fixtureProvider = () => ({mode:'fixture', draft:async()=>null, turn:async(s,text)=>({intent:fixtureIntent(s,text)}), assess:async s=>fixtureAssessment(s)});
@@ -299,4 +299,56 @@ test('corrected seed appends a version while preserving old scenario and histori
   assert.equal(second.app.store.db.prepare('SELECT data FROM sessions WHERE id=?').get(s.id).data,historicalJSON);
   assert.equal(second.app.store.getScenario(old.id,undefined,'*').version,2);assert.equal(second.app.store.getScenario(old.id,undefined,'*').rules.clientReturnDays,4);
   await second.close();const third=await boot(t,{databasePath});assert.equal(third.app.store.db.prepare('SELECT COUNT(*) n FROM scenarios WHERE id=?').get(old.id).n,2);
+});
+
+function projectedProvider() {
+  const provider={...fixtureProvider(),mode:'openai',turnCalls:0,projections:[]};
+  // Explicit offline interpreter only. Production OpenAI never uses this parser.
+  provider.turn=async(s,text,{executeTurn})=>{
+    provider.turnCalls++;const intent=fixtureIntent(s,text),evidence=Object.fromEntries(intentKeys.map(k=>[k,intent[k]?text:'']));
+    const projection=await executeTurn('apply_training_turn',{intent,evidence});provider.projections.push(projection);
+    if(provider.afterProjection)await provider.afterProjection(projection);
+    return {intent,evidence,reply:'Entendi as condições do exercício e o que ficou combinado.',turnTool:{name:'apply_training_turn',status:'validated'}};
+  };
+  return provider;
+}
+
+test('projected HTTP turn commits once only after narration, retry returns receipt and three turns stay within eight messages',async t=>{
+  const provider=projectedProvider(),server=await boot(t,{provider}),c=client(server.base);let s=await start(c);
+  provider.afterProjection=async projection=>{
+    const row=server.app.store.db.prepare('SELECT revision,data FROM sessions WHERE id=?').get(s.id);
+    assert.equal(row.revision,s.revision);assert.equal(JSON.parse(row.data).messages.length,s.messages.length);
+    assert.equal(projection.candidate.messages.length,s.messages.length+1);assert.equal(projection.candidate.messages.at(-1).role,'user');
+  };
+  const id=randomUUID(),before=s;const first=await command(c,s,'messages',{text:'Entendo a urgência da viagem.'},id);assert.equal(first.status,200);s=first.body.session;
+  assert.deepEqual((await command(c,before,'messages',{text:'Entendo a urgência da viagem.'},id)).body,first.body);assert.equal(provider.turnCalls,1);
+  s=(await command(c,s,'messages',{text:'Não posso garantir o reparo.'})).body.session;
+  s=(await command(c,s,'messages',{text:'Vou atualizar você hoje às 17h.'})).body.session;
+  assert.equal(s.messages.length,8);assert.equal(s.ending.id,'END-02');assert.equal(provider.turnCalls,3);
+  assert.equal(server.app.store.db.prepare('SELECT COUNT(*) n FROM commands WHERE session_id=?').get(s.id).n,3);
+});
+
+test('failure after turn projection saves no placeholder or receipt and explicit retry remains safe',async t=>{
+  const provider=projectedProvider(),server=await boot(t,{provider}),c=client(server.base),s=await start(c),id=randomUUID();
+  provider.afterProjection=async()=>{throw new AppError(503,'MODEL_TIMEOUT','Narração sintética interrompida.');};
+  assert.equal((await command(c,s,'messages',{text:'Um aparelho provisório ajudaria?'},id)).status,503);
+  assert.deepEqual((await c.req(`/api/sessions/${s.id}`)).body.session,s);
+  assert.equal(server.app.store.db.prepare('SELECT COUNT(*) n FROM commands WHERE session_id=?').get(s.id).n,0);
+  assert.equal(server.app.store.db.prepare('SELECT COUNT(*) n FROM messages WHERE session_id=?').get(s.id).n,1);
+  assert.equal(server.app.store.db.prepare('SELECT COUNT(*) n FROM events WHERE session_id=?').get(s.id).n,1);
+  provider.afterProjection=null;const retry=await command(c,s,'messages',{text:'Um aparelho provisório ajudaria?'},id);assert.equal(retry.status,200);assert.equal(retry.body.session.messages.length,3);
+});
+
+test('projected narration cannot overwrite a concurrent revision or persist a changed interpretation echo',async t=>{
+  const provider=projectedProvider(),server=await boot(t,{provider}),c=client(server.base),s=await start(c);const owner=server.app.store.identity(c.cookie).owner;
+  provider.afterProjection=async()=>{
+    const current=server.app.store.getSession(s.id,owner),after=structuredClone(current),body={commandId:'external-pause',expectedRevision:current.revision};after.status='paused';
+    const receipt=server.app.store.receipt(current,body,'pause');server.app.store.commit(owner,current,after,body,receipt.payloadHash,'pause');
+  };
+  assert.equal((await command(c,s,'messages',{text:'Um provisório ajudaria?'})).status,409);
+  let paused=(await c.req(`/api/sessions/${s.id}`)).body.session;assert.equal(paused.status,'paused');assert.equal(paused.messages.length,1);
+  paused=(await command(c,paused,'resume')).body.session;provider.afterProjection=null;
+  const original=provider.turn;provider.turn=async(...args)=>{const value=await original(...args);value.intent.confirmLoan=!value.intent.confirmLoan;return value;};
+  const bad=await command(c,paused,'messages',{text:'Um provisório ajudaria?'});assert.equal(bad.status,503);assert.equal(bad.body.error.code,'INVALID_TURN_RESULT');
+  assert.deepEqual((await c.req(`/api/sessions/${s.id}`)).body.session,paused);
 });

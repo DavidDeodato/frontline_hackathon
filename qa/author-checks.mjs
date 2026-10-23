@@ -17,6 +17,8 @@ const provider={mode:'openai',async draft(text,policyText='',options={}){
  assert.equal(typeof options.executeTool,'function','server must provide the validated author tool');
  const quote=options.revisionText||policyText||text;
  const proposal={title:options.currentDraft?'Revisão da alternativa':'Contato com a família',summary:'Exercício sintético adaptado para assistência técnica.',need:'Usar um aparelho para falar com a família durante a viagem.',opening:'Preciso manter contato durante a viagem. Há uma alternativa?',unknowns:['A chegada da peça não tem prazo confirmado.'],contextualFacts:[{id:'QA-ORIGIN',text:'O relato original permanece disponível para revisão.',status:'provided',sourceQuote:text}],rules:{loanAvailable:available,loanDays:7},ruleEvidence:{loanAvailable:failure==='source'?'Citação inventada que não existe.':quote,loanDays:policyText||text}};
+ proposal.compatibility={supported:failure!=='unsupported',reason:failure==='unsupported'?'O contexto clínico não é executável no catálogo de assistência.':'O relato trata de um aparelho no domínio de assistência.',sourceQuote:quote};
+ proposal.clientBrief={objective:'Manter contato com a família durante a viagem.',traits:failure==='brief'?['A','B','C','D']:['Pede uma resposta concreta.'],initialState:'Está preocupado com a ausência do aparelho.'};
  const result=await options.executeTool('compose_exercise',{operation:options.currentDraft?'revise':'create',proposal});toolCalls++;
  if(failure==='final')throw new AppError(503,'SYNTHETIC_FINAL_FAILURE','Falha sintética após composição, sem chamada real.');
  const candidate=structuredClone(result.candidate);if(failure==='candidate')candidate.title='Mutação após validar ferramenta';
@@ -34,7 +36,7 @@ try{
  await a('/api/health');await b('/api/health');
  await check('QA-A01','Creation passes the entire source through the real tool and commits only one result per command',async()=>{
   const commandId=randomUUID(),body={text:context,policyText:policy,commandId};const count=calls.length;
-  const rs=await Promise.all([a('/api/drafts',body),a('/api/drafts',body)]);draft=expect(rs[0],200).draft;assert.deepEqual(expect(rs[1],200).draft,draft);assert.equal(calls.length,count+1);assert.equal(toolCalls,1);assert.equal(draft.rawContext,context);assert.equal(draft.rawPolicyText,policy);assert.equal(calls.at(-1).context,context);assert.equal(draft.authorTool.name,'compose_exercise');assert.equal(draft.version,1);original=structuredClone(draft);
+  const rs=await Promise.all([a('/api/drafts',body),a('/api/drafts',body)]);draft=expect(rs[0],200).draft;assert.deepEqual(expect(rs[1],200).draft,draft);assert.equal(calls.length,count+1);assert.equal(toolCalls,1);assert.equal(draft.rawContext,context);assert.equal(draft.rawPolicyText,policy);assert.equal(calls.at(-1).context,context);assert.equal(draft.authorTool.name,'compose_exercise');assert.equal(draft.version,1);assert.equal(draft.clientBrief.objective,'Manter contato com a família durante a viagem.');assert.equal(draft.compatibility.supported,true);original=structuredClone(draft);
   expect(await a('/api/drafts',{...body,text:context+' changed'}),409);assert.equal(calls.length,count+1);
  });
  await check('QA-A02','Revision updates the same draft, preserves original sources and keeps previous version immutable',async()=>{
@@ -58,6 +60,12 @@ try{
  });
  await check('QA-A07','Concurrent revisions against one version yield one committed result and one conflict',async()=>{
   const count=calls.length,rs=await Promise.all(['Ajuste sintético A.','Ajuste sintético B.'].map(text=>a(`/api/drafts/${draft.id}/revisions`,{text,commandId:randomUUID(),expectedVersion:3})));assert.deepEqual(rs.map(r=>r.status).sort(),[200,409]);assert.equal(calls.length,count+1);assert.equal(expect(await a(`/api/drafts/${draft.id}/versions`),200).versions.length,4);
+ });
+ await check('QA-A08','A declared unsupported domain is rejected with 422 without changing the prior draft',async()=>{
+  const beforeVersions=expect(await a(`/api/drafts/${draft.id}/versions`),200);failure='unsupported';const denied=expect(await a(`/api/drafts/${draft.id}/revisions`,{text:'Quero uma consulta clínica entre médico e paciente.',commandId:randomUUID(),expectedVersion:4}),422);failure=null;assert.equal(denied.error.code,'UNSUPPORTED_CONTEXT');assert.deepEqual(expect(await a(`/api/drafts/${draft.id}/versions`),200),beforeVersions);
+ });
+ await check('QA-A09','Invalid client characterization cannot create an extra version',async()=>{
+  const beforeVersions=expect(await a(`/api/drafts/${draft.id}/versions`),200);failure='brief';expect(await a(`/api/drafts/${draft.id}/revisions`,{text:'Quatro características excedem o limite contratado.',commandId:randomUUID(),expectedVersion:4}),503);failure=null;assert.deepEqual(expect(await a(`/api/drafts/${draft.id}/versions`),200),beforeVersions);
  });
 }finally{await app.close();}
 const after=snapshot(),report={at:new Date().toISOString(),runId:'FRONTLINE-CHATS-V3-20261023',mode:'offline_injected_provider_real_server_tool',network:'loopback_only',port,serverClosed:true,readSetBefore:before,readSetAfter:after,snapshotStable:JSON.stringify(before)===JSON.stringify(after),providerInvocations:calls.length,toolExecutions:toolCalls,results,passed:results.filter(r=>r.status==='pass').length,failed:results.filter(r=>r.status==='fail').length,limits:['No real model inference or paid request.','Does not prove semantic domain compatibility or browser input preservation.']};
