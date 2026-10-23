@@ -22,7 +22,7 @@ No episódio **A viagem de amanhã**, Roberto precisa de um aparelho antes de vi
 - **Praticar:** conversar por texto em uma sala 2.5D com ordem de serviço, política e agenda.
 - **Compreender:** receber três critérios de avaliação, trechos da conversa e uma melhoria concreta.
 - **Experimentar:** repetir o exercício e comparar consequências, preservando a tentativa anterior.
-- **Continuar:** retomar sessões salvas, exportar tentativas e verificar a integridade da cópia. WhatsApp permanece uma expansão planejada.
+- **Continuar:** retomar sessões salvas, exportar tentativas e verificar a integridade da cópia. O serviço WhatsApp prepara um relato e devolve um link para revisão humana na plataforma; não vincula conta nem acessa histórico.
 
 **Demonstração:** [abrir Frontline](https://frontline-production-4f55.up.railway.app). Versão de trabalho; atualizações podem causar uma breve indisponibilidade.
 
@@ -139,3 +139,9 @@ Os documentos abaixo preservam a evolução da proposta antes da implementação
 - [Mercado e modelo comercial](docs/04-mercado-e-modelo-comercial.md)
 - [Pitch e demonstração inicial](docs/05-pitch-e-demonstracao.md)
 - [Plano inicial de validação](docs/06-validacao-e-entrega.md)
+
+## Preparação pelo WhatsApp
+
+O [microserviço WhatsApp](services/whatsapp/README.md) está incluído no repositório. Recebe mensagens individuais com `!bot`, responde com orientação e oferece um link de preparação. A plataforma valida o relato, permite editar ou descartar e exige confirmação antes de usá-lo. Não cria treino automaticamente. Use somente relatos fictícios e anonimizados.
+
+O pacote adicional passou em 12 verificações de handoff, 9 testes do serviço e build de 1.606 módulos. Esses testes não confirmam a conversa completa pelo WhatsApp; o teste de ponta a ponta iniciado pelo usuário permanece pendente.

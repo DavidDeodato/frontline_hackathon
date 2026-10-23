@@ -41,7 +41,7 @@ O limite configurado é de 36 chamadas e 46.800 tokens de saída reservados, com
 ## Limites atuais
 
 - Verificação de email, recuperação de senha e autenticação por serviços externos não estão implementadas.
-- WhatsApp entre dispositivos e transações em Devnet não estão habilitados. Presença de adaptador não comprova uma operação externa.
+- O microserviço WhatsApp e a importação de relato foram acrescentados no commit `98c8c6d`. O teste completo de mensagem recebida, resposta e revisão na plataforma permanece pendente. Transações em Devnet continuam desativadas.
 - Revisão responsiva, acessibilidade e fidelidade às dez idealizações visuais continuam pendentes.
 - Testes pontuais com IA não demonstram robustez de todos os cenários, eficácia de aprendizagem ou certificação profissional.
 - Persistência de sessão foi verificada após o deploy; o contador global da quota cloud não foi lido. Não reutilize bancos de teste nem reinicie o ledger para renovar orçamento.
@@ -49,3 +49,9 @@ O limite configurado é de 36 chamadas e 46.800 tokens de saída reservados, com
 ## Reproduzir
 
 Siga o [README](../../README.md) e as [instruções do runtime](../../runtime/README.md). Execute `npm test` e `npm run build`. O modo determinístico funciona sem credenciais. Evidências e bancos temporários de `qa/` são locais, sintéticos e ignorados pelo Git.
+
+## Atualização de preparação por WhatsApp
+
+Código publicado em `98c8c6d`: serviço independente em `services/whatsapp`, contrato de handoff e importação de texto pela biblioteca. A cópia isolada passou em 12 verificações de entrada/limites e 9 testes do serviço, sem chamadas de rede, além do build de 1.606 módulos. O pacote preserva os três arquivos de autenticação já publicados. Esta verificação adicional não repete nem amplia a comprovação semântica dos diálogos. Deploy do site em atualização; conexão do bot e teste humano de ponta a ponta são verificações separadas.
+
+A atualização cumulativa `f774b08` acrescenta entrada por login e escolha explícita de visitante, mantendo os parâmetros do relato recebido. Build isolado: 1.607 módulos, sem erros. O comportamento novo ainda depende da conclusão do deploy e da verificação pública; os testes públicos anteriores pertencem à versão precedente.
