@@ -16,6 +16,7 @@ export default function HelpConversation({ view, onAction, onActivity, disabled 
   const [conversation, setConversation] = useState(null), [draft, setDraft] = useState('');
   const [loading, setLoading] = useState(true), [sending, setSending] = useState(false), [error, setError] = useState('');
   const [failedCommand, setFailedCommand] = useState(null), [reload, setReload] = useState(0);
+  const [trainingBlocked, setTrainingBlocked] = useState(false);
   const request = useRef(null), generation = useRef(0), mounted = useRef(true), locked = useRef(false), input = useRef(null), log = useRef(null);
   const activity = useRef(onActivity); activity.current = onActivity;
 
@@ -23,7 +24,7 @@ export default function HelpConversation({ view, onAction, onActivity, disabled 
     const response = await fetch(`/api/help/${method === 'GET' ? 'conversation' : 'messages'}`, { method, credentials: 'same-origin', headers: body ? { 'Content-Type': 'application/json' } : undefined, body: body ? JSON.stringify(body) : undefined, signal });
     let data; try { data = await response.json(); } catch { throw new Error('A ajuda está indisponível no momento. Tente novamente.'); }
     if (response.status === 404) throw new Error('A conversa com Fio ainda não está disponível. Você pode usar o guia desta tela.');
-    if (!response.ok) throw new Error(data.error?.message || 'Não foi possível consultar a ajuda. Tente novamente.');
+    if (!response.ok) { const cause = new Error(data.error?.message || 'Não foi possível consultar a ajuda. Tente novamente.'); cause.code = data.error?.code; throw cause; }
     return readEnvelope(data);
   }
 
@@ -42,9 +43,10 @@ export default function HelpConversation({ view, onAction, onActivity, disabled 
 
   useEffect(() => { if (log.current) log.current.scrollTop = log.current.scrollHeight; }, [conversation?.messages.length, sending]);
   useEffect(() => { activity.current?.(sending ? 'thinking' : draft.trim() ? 'listening' : 'greeting'); }, [sending, draft]);
+  const updateDraft = value => { setDraft(value); if (failedCommand && !trainingBlocked) { setFailedCommand(null); setError(''); } };
 
   async function send(command) {
-    if (locked.current || disabled || loading || !conversation) return;
+    if (locked.current || disabled || loading || !conversation || (trainingBlocked && !command)) return;
     const text = (command?.text || draft).trim(); if (!text || text.length > 1000) return;
     const payload = command || (failedCommand?.text === text ? failedCommand : { commandId: crypto.randomUUID(), text, view: VIEWS.has(view) ? view : 'library' });
     locked.current = true; setSending(true); setError(''); setFailedCommand(null);
@@ -52,10 +54,11 @@ export default function HelpConversation({ view, onAction, onActivity, disabled 
     const timeout = setTimeout(() => controller.abort('timeout'), 65000);
     try {
       const data = await call('POST', payload, controller.signal);
-      if (mounted.current && version === generation.current) { setConversation(data); setDraft(''); }
+      if (mounted.current && version === generation.current) { setConversation(data); setDraft(''); setTrainingBlocked(false); }
     } catch (cause) {
       if (mounted.current && version === generation.current) {
         setFailedCommand(payload);
+        setTrainingBlocked(cause.code === 'HELP_DURING_TRAINING');
         setError(controller.signal.aborted ? 'A resposta demorou. Sua pergunta foi preservada; tentar novamente consulta a mesma ação.' : cause instanceof TypeError ? 'Não foi possível conectar à ajuda. Sua pergunta foi preservada.' : cause.message || 'Não foi possível conectar à ajuda. Sua pergunta foi preservada.');
       }
     } finally { clearTimeout(timeout); locked.current = false; if (mounted.current && version === generation.current) setSending(false); }
@@ -64,15 +67,15 @@ export default function HelpConversation({ view, onAction, onActivity, disabled 
   return <div className="fio-help">
     <div className="fio-help__mode"><span className="fio-help__dot" aria-hidden="true" />{conversation ? conversation.mode === 'openai' ? 'Ajuda com IA' : 'Guia da plataforma' : 'Ajuda sobre o Frontline'}<span>Histórico de ajuda</span></div>
     <div className="fio-help__messages" ref={log} role="log" aria-label="Conversa de ajuda com Fio" aria-live="polite" aria-relevant="additions" aria-busy={loading || sending}>
-      {loading ? <p className="fio-help__empty" role="status">Carregando sua conversa…</p> : conversation?.messages.length ? conversation.messages.map(message => <div key={message.id} className={`fio-help__message fio-help__message--${message.role}`}><span>{message.role === 'user' ? 'Você' : 'Fio'}</span><p>{message.text}</p></div>) : <div className="fio-help__empty"><strong>Vamos encontrar o próximo passo.</strong><p>Posso explicar como criar situações, consultar revisões e navegar pelo Frontline.</p></div>}
+      {loading ? <p className="fio-help__empty" role="status">Carregando sua conversa…</p> : conversation?.messages.length ? conversation.messages.map(message => <div key={message.id} className={`fio-help__message fio-help__message--${message.role}`}><span>{message.role === 'user' ? 'Você' : message.mode === 'openai' ? 'Fio · IA' : message.mode === 'guide' ? 'Fio · guia' : 'Fio'}</span><p>{message.text}</p></div>) : <div className="fio-help__empty"><strong>Vamos encontrar o próximo passo.</strong><p>Posso explicar como criar situações, consultar revisões e navegar pelo Frontline.</p></div>}
       {sending ? <p className="fio-help__working" role="status">{conversation?.mode === 'openai' ? 'Fio está preparando a resposta…' : 'Consultando o guia…'}</p> : null}
     </div>
-    {!loading && !conversation?.messages.length ? <div className="fio-help__suggestions" aria-label="Sugestões de perguntas">{SUGGESTIONS.map(text => <button type="button" key={text} disabled={sending || disabled} onClick={() => { setDraft(text); input.current?.focus(); }}>{text}</button>)}</div> : null}
+    {!loading && !conversation?.messages.length ? <div className="fio-help__suggestions" aria-label="Sugestões de perguntas">{SUGGESTIONS.map(text => <button type="button" key={text} disabled={sending || disabled} onClick={() => { updateDraft(text); input.current?.focus(); }}>{text}</button>)}</div> : null}
     {conversation?.actions?.length ? <div className="fio-help__links" aria-label="Próximos passos sugeridos">{conversation.actions.map(action => <button type="button" key={action.id} disabled={sending || disabled} onClick={() => onAction?.(action.id)}>{action.label}<span aria-hidden="true"> ↗</span></button>)}</div> : null}
     {error ? <div className="fio-help__error" role="alert"><p>{error}</p><button type="button" disabled={loading || sending || disabled} onClick={() => failedCommand ? send(failedCommand) : setReload(value => value + 1)}>Tentar novamente</button></div> : null}
     <form className="fio-help__composer" onSubmit={event => { event.preventDefault(); send(); }}>
       <label htmlFor="fio-help-question">Sua dúvida sobre a plataforma</label>
-      <div><textarea id="fio-help-question" ref={input} value={draft} maxLength={1000} rows={2} disabled={sending || disabled} placeholder="Como posso usar o Frontline?" onChange={event => setDraft(event.target.value)} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); send(); } }} /><button type="submit" disabled={loading || sending || disabled || !conversation || !draft.trim()} aria-label="Enviar pergunta ao Fio">{sending ? '…' : '↑'}</button></div>
+      <div><textarea id="fio-help-question" ref={input} value={draft} maxLength={1000} rows={2} disabled={sending || disabled || trainingBlocked} placeholder="Como posso usar o Frontline?" onChange={event => updateDraft(event.target.value)} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); send(); } }} /><button type="submit" disabled={loading || sending || disabled || trainingBlocked || !conversation || !draft.trim()} aria-label="Enviar pergunta ao Fio">{sending ? '…' : '↑'}</button></div>
       <small>Ajuda de uso · não responde pelo participante no ensaio.</small>
     </form>
   </div>;

@@ -6,6 +6,8 @@ import { openStore, hash } from './store.mjs';
 import { createProvider } from './provider.mjs';
 import { applyDraftProposal, createDraftToolExecutor } from './drafts.mjs';
 import { createTurnToolExecutor } from './turns.mjs';
+import { createAccounts, createAccountHttpHandler } from './accounts/index.mjs';
+import { createHelp } from './help/index.mjs';
 import { IntegrationError, integrationCapabilities, createSessionExport, verifySessionExport } from './integrations/index.mjs';
 import { AppError, fail, baseScenario, projectRules, validateScenario, newSession, wireSession, clone, openDocument, applyTurn, finishAssessment } from './engine.mjs';
 
@@ -23,6 +25,11 @@ async function readBody(req, maximumBytes = 65536) {
 
 export function createApp({ databasePath = fileURLToPath(new URL('../data/frontline.sqlite', import.meta.url)), provider = createProvider(), allowedOrigins = ['http://127.0.0.1:5182', 'http://localhost:5182'], secureCookies = false } = {}) {
   const store = openStore(databasePath);
+  const accounts = createAccounts({db:store.db,secureCookies});
+  const handleAccount = createAccountHttpHandler({accounts,store,readBody});
+  const help = createHelp({db:store.db,provider,assertCanChat(owner) {
+    if (store.hasActiveTraining(owner)) fail(409,'HELP_DURING_TRAINING','A ajuda conversacional fica indisponível durante um ensaio ativo ou pausado. Use o guia dos controles ou conclua o ensaio.');
+  }});
   const locks = new Map();
   async function serialized(key, action) {
     const prior = locks.get(key) || Promise.resolve();
@@ -38,13 +45,25 @@ export function createApp({ databasePath = fileURLToPath(new URL('../data/frontl
       const origin = req.headers.origin;
       const sameHost = origin && (() => { try { return new URL(origin).host === req.headers.host; } catch { return false; } })();
       if (origin && !allowedOrigins.includes(origin) && !sameHost) fail(403, 'ORIGIN_FORBIDDEN', 'Origem não autorizada.');
-      const ident = store.identity(req.headers.cookie);
+      const accountResponse = await handleAccount(req,res,url);
+      if (accountResponse.handled) { res.statusCode=200;res.end(JSON.stringify(accountResponse.output));return; }
+      const account = accounts.resolve(req.headers.cookie);
+      const ident = account || store.identity(req.headers.cookie);
       if (ident.token) res.setHeader('Set-Cookie', `frontline_guest=${ident.token}; Path=/; HttpOnly; SameSite=Lax${secureCookies ? '; Secure' : ''}; Max-Age=604800`);
       const owner = ident.owner;
+      const assertIdentity = () => {
+        const current = accounts.resolve(req.headers.cookie);
+        if (current ? current.owner !== owner : account || !store.hasGuest(owner)) fail(409,'IDENTITY_CHANGED','Sua identidade mudou. Atualize a tela antes de tentar novamente.');
+      };
       const method = req.method;
       let output;
       if (method === 'GET' && url.pathname === '/api/health') output = { status: 'ok', providerMode: provider.mode, contractVersion: '0.1' };
       else if (method === 'GET' && url.pathname === '/api/library') output = store.library(owner);
+      else if (method === 'GET' && url.pathname === '/api/help/conversation') output = help.getConversation(owner);
+      else if (method === 'POST' && url.pathname === '/api/help/messages') {
+        const body = await readBody(req); assertIdentity();
+        output = await help.sendMessage(owner,body,{assertIdentity});
+      }
       else if (method === 'GET' && url.pathname === '/api/integrations/status') output = integrationCapabilities();
       else if (method === 'POST' && url.pathname === '/api/exports/verify') {
         const body = await readBody(req, 1024 * 1024);
@@ -60,6 +79,7 @@ export function createApp({ databasePath = fileURLToPath(new URL('../data/frontl
         const body = await readBody(req); const text = textField(body.text, 'Contexto');
         if (body.policyText !== undefined && (typeof body.policyText !== 'string' || body.policyText.length > 6000)) fail(422, 'INVALID_POLICY', 'Política deve ser um texto de até 6000 caracteres.');
         output = await serialized(`draft-create:${owner}:${body.commandId ?? randomUUID()}`, async () => {
+          assertIdentity();
           const receipt = store.draftReceipt(owner,'create',body,'draft.create'); if (receipt.result) return receipt.result;
           let d;
           if (provider.mode === 'fixture') {
@@ -71,7 +91,7 @@ export function createApp({ databasePath = fileURLToPath(new URL('../data/frontl
             const tool = createDraftToolExecutor({text,policyText:body.policyText || '',mode:provider.mode});
             d = tool.finish(await provider.draft(text,body.policyText || '',{executeTool:tool.executeTool}));
           }
-          validateScenario(d);
+          assertIdentity(); validateScenario(d);
           return store.saveDraftResult(owner,d,{scope:'create',body,operation:'draft.create',requestText:text});
         });
       } else if (method === 'GET' && /^\/api\/drafts\/[^/]+\/versions$/.test(url.pathname)) {
@@ -81,6 +101,7 @@ export function createApp({ databasePath = fileURLToPath(new URL('../data/frontl
         const revisionText = textField(body.text,'Alteração');
         if (body.commandId === undefined) fail(422,'INVALID_COMMAND','Informe commandId válido.');
         output = await serialized(`draft:${id}`,async () => {
+          assertIdentity();
           const before = store.getDraft(owner,id);
           const receipt = store.draftReceipt(owner,id,body,'draft.revise'); if (receipt.result) return receipt.result;
           store.checkDraftVersion(before,body.expectedVersion,true);
@@ -88,12 +109,13 @@ export function createApp({ databasePath = fileURLToPath(new URL('../data/frontl
           const text = before.rawContext || '', policyText = before.rawPolicyText || '';
           const tool = createDraftToolExecutor({text,policyText,currentDraft:before,revisionText,mode:provider.mode});
           const proposal = await provider.draft(text,policyText,{currentDraft:clone(before),revisionText,executeTool:tool.executeTool});
-          const d = tool.finish(proposal); validateScenario(d);
+          const d = tool.finish(proposal); assertIdentity(); validateScenario(d);
           return store.saveDraftResult(owner,d,{body,operation:'draft.revise',expectedVersion:before.version,requestText:revisionText});
         });
       } else if ((method === 'PATCH' || method === 'POST') && /^\/api\/drafts\/[^/]+(?:\/publish)?$/.test(url.pathname)) {
         const [, , , id, action] = url.pathname.split('/'); const body = await readBody(req);
         output = await serialized(`draft:${id}`,async () => {
+        assertIdentity();
         const d = store.getDraft(owner,id);
         if (method === 'POST' && action === 'publish') { validateScenario(d); return { scenario: store.publish(owner,d,body) }; }
         else if (method === 'PATCH' && !action) {
@@ -122,6 +144,7 @@ export function createApp({ databasePath = fileURLToPath(new URL('../data/frontl
         });
       } else if (method === 'POST' && url.pathname === '/api/sessions') {
         const body = await readBody(req);
+        assertIdentity();
         if (body.scenarioVersion !== undefined && (!Number.isInteger(body.scenarioVersion) || body.scenarioVersion < 1)) fail(422, 'INVALID_VERSION', 'Informe uma versão inteira positiva.');
         const scenario = store.getScenario(textField(body.scenarioId, 'Cenário', 200), body.scenarioVersion, owner);
         const s = newSession(scenario, provider.mode); store.transaction(() => store.insertSession(owner, s)); output = { session: wireSession(s) };
@@ -135,6 +158,7 @@ export function createApp({ databasePath = fileURLToPath(new URL('../data/frontl
         else if (method === 'POST' && ['messages','documents','pause','resume','cancel','branches','assessment/retry'].includes(operation)) {
           const body = await readBody(req);
           output = await serialized(id, async () => {
+            assertIdentity();
             const before = store.getSession(id, owner); const receipt = store.receipt(before, body, operation); if (receipt.result) return receipt.result;
             let after = clone(before); let branch;
             if (operation === 'messages') {
@@ -145,6 +169,7 @@ export function createApp({ databasePath = fileURLToPath(new URL('../data/frontl
                 const tool = createTurnToolExecutor(before,text);
                 after = tool.finish(await provider.turn(clone(before),text,{executeTurn:tool.executeTurn}));
               } else after = applyTurn(before,text,await provider.turn(before,text));
+              assertIdentity();
               if (['completed', 'incomplete'].includes(after.status)) {
                 try { finishAssessment(after, await provider.assess(after)); }
                 catch (error) { after.assessmentError = { code: error instanceof AppError ? error.code : 'MODEL_UNAVAILABLE', message: error instanceof AppError ? error.message : 'A conversa foi salva. Não foi possível avaliar agora; tente novamente.' }; }
@@ -166,6 +191,7 @@ export function createApp({ databasePath = fileURLToPath(new URL('../data/frontl
               if (before.mode !== provider.mode) fail(503, 'PROVIDER_MODE_CHANGED', 'Avalie esta sessão com o mesmo modo de interpretação.', wireSession(before));
               if (!before.evaluation) finishAssessment(after, await provider.assess(after));
             }
+            assertIdentity();
             return store.commit(owner, before, after, body, receipt.payloadHash, operation, branch);
           });
         } else fail(404, 'NOT_FOUND', 'Rota não encontrada.');

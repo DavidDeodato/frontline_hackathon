@@ -27,6 +27,10 @@
 .refined-sidebar .sidebar-profile-copy{min-width:0;white-space:nowrap}
 .refined-sidebar .user-profile strong{font-size:11px;letter-spacing:.1px}
 .refined-sidebar .user-profile span{font-size:9px;color:#8e9fae}
+.refined-sidebar .user-profile strong{overflow:hidden;text-overflow:ellipsis;max-width:146px}
+.sidebar-account-action{display:flex;align-items:center;justify-content:flex-start;gap:10px;width:100%;padding:11px 0 0;margin-top:9px;border:0;background:transparent;color:#91d9df;font-size:11px}.sidebar-account-action:hover{color:#d5fcff}.sidebar-account-action:focus-visible{outline:2px solid #69e3eb;outline-offset:4px;border-radius:4px}
+.is-sidebar-collapsed .sidebar-account-action{justify-content:center}.is-sidebar-collapsed .sidebar-account-action span{display:none}
+.mobile-account{display:none;border:0;background:transparent;color:#087f8c;font-size:11px;padding:5px 2px;min-height:32px}
 @media(min-width:761px){
  .frontline-shell:not(.is-sidebar-collapsed) .refined-sidebar .brand-wordmark{display:block}
  .frontline-shell:not(.is-sidebar-collapsed) .refined-sidebar .brand-compact{display:none}
@@ -44,6 +48,7 @@
  .is-sidebar-collapsed .refined-sidebar .nav-item:hover::after,.is-sidebar-collapsed .refined-sidebar .nav-item:focus-visible::after{opacity:1;visibility:visible;transform:translate(0,-50%)}
 }
 @media(max-width:760px){
+ .mobile-account{display:block}
  .frontline-shell .refined-sidebar{height:64px;flex-direction:row;align-items:center;padding:0 20px;border-right:0}
  .refined-sidebar .sidebar-heading{margin:0;min-height:0}
  .refined-sidebar .brand{padding:0;font-size:25px}

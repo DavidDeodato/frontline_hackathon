@@ -4,6 +4,7 @@ import { mkdtempSync, readdirSync, unlinkSync, rmdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { openStore } from '../server/store.mjs';
 import { baseScenario, newSession } from '../server/engine.mjs';
 import { createAccounts, accountEnvelope, migrateAccounts } from '../server/accounts/index.mjs';
@@ -185,6 +186,38 @@ test('accounts, ownership and revocation persist after closing and reopening the
   } finally {
     store?.close();
     // Only the temporary test directory created above; no recursive deletion.
+    for (const filename of readdirSync(directory)) unlinkSync(join(directory, filename));
+    rmdirSync(directory);
+  }
+});
+
+test('an account session survives a real Node process replacement using the same database', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'frontline-accounts-process-test-'));
+  const databasePath = join(directory, 'accounts.sqlite');
+  const storeModule = new URL('../server/store.mjs', import.meta.url).href;
+  const accountsModule = new URL('../server/accounts/index.mjs', import.meta.url).href;
+  const program = `
+    import {readFileSync} from 'node:fs';
+    import {openStore} from ${JSON.stringify(storeModule)};
+    import {createAccounts} from ${JSON.stringify(accountsModule)};
+    const input=JSON.parse(readFileSync(0,'utf8'));
+    const store=openStore(input.databasePath),accounts=createAccounts({db:store.db});
+    try {
+      if(input.operation==='create') {
+        const result=await accounts.register({name:'Processo Sintético',email:'process@example.test',password:'synthetic-process-password'});
+        process.stdout.write(JSON.stringify({pid:process.pid,userId:result.user.id,cookie:result.setCookies[0].split(';')[0]}));
+      } else {
+        const result=accounts.resolve(input.cookie);
+        process.stdout.write(JSON.stringify({pid:process.pid,userId:result.user.id}));
+      }
+    } finally {store.close();}
+  `;
+  try {
+    const run = input => JSON.parse(execFileSync(process.execPath, ['--input-type=module', '-e', program], { cwd: new URL('..', import.meta.url), input: JSON.stringify({ databasePath, ...input }), encoding: 'utf8', timeout: 15000 }));
+    const first = run({ operation: 'create' }), second = run({ operation: 'resolve', cookie: first.cookie });
+    assert.notEqual(first.pid, second.pid);
+    assert.equal(first.userId, second.userId);
+  } finally {
     for (const filename of readdirSync(directory)) unlinkSync(join(directory, filename));
     rmdirSync(directory);
   }

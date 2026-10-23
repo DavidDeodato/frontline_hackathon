@@ -1,8 +1,9 @@
 import React from 'react';
-import { ChevronLeft, ChevronRight, PanelLeftOpen } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LogIn, LogOut, PanelLeftOpen } from 'lucide-react';
 import './Sidebar.css';
 
-export default function Sidebar({ collapsed, onToggle, sections, onNavigate, onHome, busy }) {
+export default function Sidebar({ collapsed, onToggle, sections, onNavigate, onHome, busy, user, onLogin, onLogout }) {
+  const displayName = user?.name || 'Visitante';
   return <aside className="sidebar refined-sidebar" aria-label="Seu espaço Frontline">
     <div className="sidebar-heading">
       <button type="button" className="brand" onClick={onHome} disabled={busy} aria-label="Frontline — biblioteca">
@@ -23,10 +24,11 @@ export default function Sidebar({ collapsed, onToggle, sections, onNavigate, onH
     </nav>
     <div className="sidebar-bottom">
       <div className="sidebar-rule" />
-      <div className="user-profile" title={collapsed ? 'Mariana Oliveira · Participante do exercício' : undefined}>
-        <div className="avatar participant" aria-hidden="true">M</div>
-        <div className="sidebar-profile-copy"><strong>Mariana Oliveira</strong><span>Participante do exercício</span></div>
+      <div className="user-profile" title={collapsed ? displayName : undefined}>
+        <div className="avatar participant" aria-hidden="true">{user?.name?.trim().charAt(0).toLocaleUpperCase('pt-BR') || 'V'}</div>
+        <div className="sidebar-profile-copy"><strong>{displayName}</strong><span>{user ? 'Sua conta' : 'Acesso sem conta'}</span></div>
       </div>
+      <button className="sidebar-account-action" type="button" onClick={user ? onLogout : onLogin} disabled={busy} aria-label={user ? `Sair da conta de ${displayName}` : 'Entrar na sua conta'} title={collapsed ? (user ? 'Sair da conta' : 'Entrar') : undefined}>{user ? <LogOut size={17} /> : <LogIn size={17} />}<span>{user ? 'Sair da conta' : 'Entrar ou criar conta'}</span></button>
     </div>
   </aside>;
 }

@@ -2,6 +2,7 @@ import { AppError, fixtureIntent, fixtureAssessment, intentKeys } from './engine
 import { AI_CONTRACT_VERSION, interpretationSchema, turnReplySchema, assessmentSchema, authorToolSchema, authorReviewSchema, assertSchema, validateInterpretation, validateTurnReply, validateDraft, validateAssessment, validateAuthorReview } from './ai/contracts.mjs';
 import { processBudget, RUN_LIMITS } from './ai/budget.mjs';
 import { DRAFT_INSTRUCTIONS, AUTHOR_REVIEW_INSTRUCTIONS, TURN_INTERPRETATION_INSTRUCTIONS, TURN_REPLY_INSTRUCTIONS, TURN_SPEAKER_REMINDER, ASSESSMENT_INSTRUCTIONS, ROLE_CONTRACT } from './ai/prompts.mjs';
+import { HELP_INSTRUCTIONS, helpSchema, validateHelpInput, validateHelpResponse } from './ai/help.mjs';
 export { createRequestBudget } from './ai/budget.mjs';
 
 const error = (code, message) => new AppError(503, code, message);
@@ -83,6 +84,11 @@ export function createProvider({ apiKey = process.env.OPENAI_API_KEY, model = pr
     mode, contractVersion: AI_CONTRACT_VERSION,
     getTelemetry: () => structuredClone(telemetry),
     getBudget: () => budget.snapshot(),
+    async help(value) {
+      const data = validateHelpInput(value);
+      if (mode !== 'openai') throw error('HELP_UNAVAILABLE', 'A ajuda com IA não está disponível neste modo. Use o guia da plataforma.');
+      return structured('platform_help', helpSchema(data.allowedActions), HELP_INSTRUCTIONS, data, reply => validateHelpResponse(reply, data.allowedActions));
+    },
     async turn(session, text, { executeTurn } = {}) {
       checkSession(session); checkText(text, 2000);
       const userTurns = session.messages.filter(message => message.role === 'user').length;

@@ -31,16 +31,16 @@ function localGuide(text) {
   const query = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   if (/whats|conex|canal|blockchain|solana/.test(query)) return { text: 'Em Conexões você confere o estado real dos canais. WhatsApp ainda não está habilitado nesta versão. A exportação tem verificação de integridade; isso não significa um registro em blockchain.', actionIds: ['open_channels', 'open_records'] };
   if (/senha|cadast|conta|login|entrar/.test(query)) return { text: 'Use Entrar ou Criar conta no menu do seu perfil. No cadastro, informe nome, email e senha; nunca envie sua senha aqui. Você também pode continuar como visitante. A verificação de email e a recuperação de senha ainda não estão disponíveis.', actionIds: [] };
+  if (/export|registro|integridade|hash/.test(query)) return { text: 'Em Registros você acessa a exportação da tentativa e confere a integridade de uma cópia. O registro preserva a versão do cenário e a conversa daquele exercício.', actionIds: ['open_records'] };
   if (/compar|tentativa|refaz|repet|rebobin/.test(query)) return { text: 'Abra uma revisão concluída e escolha uma nova tentativa. A conversa anterior é preservada. Depois de concluir a nova, compare as decisões e as evidências das duas tentativas.', actionIds: ['open_reviews'] };
   if (/avali|feedback|criter|nota|revis/.test(query)) return { text: 'Ao concluir um ensaio, a revisão reúne três critérios, trechos da sua conversa e uma oportunidade de melhoria. Esses critérios descrevem aquela tentativa; não são uma certificação profissional.', actionIds: ['open_reviews'] };
   if (/document|politica|agenda|ordem de servico/.test(query)) return { text: 'Durante o ensaio, os documentos ficam junto da conversa: ordem de serviço, política e agenda. Eles mostram fatos e limites da situação. Consulte-os sem sair do exercício.', actionIds: ['highlight_documents'] };
-  if (/export|registro|integridade|hash/.test(query)) return { text: 'Em Registros você acessa a exportação da tentativa e confere a integridade de uma cópia. O registro preserva a versão do cenário e a conversa daquele exercício.', actionIds: ['open_records'] };
   if (/criar|situacao|contexto|personaliz|cena/.test(query)) return { text: 'Na Biblioteca, escolha Criar situação. Descreva o atendimento e as regras, gere o rascunho e revise fatos e lacunas antes de iniciar. O domínio disponível hoje é assistência e pós-venda.', actionIds: ['open_preparation'] };
   if (/responder|resposta|roberto|cliente|ganhar/.test(query)) return { text: 'Posso explicar os controles e onde estão as informações, mas não responder pelo participante. No ensaio, consulte os documentos e escolha sua própria abordagem. Depois, a revisão explica o resultado com trechos da conversa.', actionIds: ['open_library'] };
   return { text: 'Você pode escolher um exercício, criar uma situação de assistência/pós-venda, praticar uma conversa, consultar documentos e revisar o resultado. Depois, tente outra abordagem e compare. Por onde quer começar?', actionIds: ['open_library', 'open_preparation', 'open_reviews'] };
 }
 
-export function createHelp({ db, provider, now = () => Date.now() }) {
+export function createHelp({ db, provider, now = () => Date.now(), assertCanChat = () => {} }) {
   db.exec(`CREATE TABLE IF NOT EXISTS help_conversations(
     id TEXT PRIMARY KEY, owner TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL
   );
@@ -79,13 +79,14 @@ export function createHelp({ db, provider, now = () => Date.now() }) {
     locks.set(owner, current);
     try { return await current; } finally { if (locks.get(owner) === current) locks.delete(owner); }
   }
-  async function sendMessage(owner, input) {
+  async function sendMessage(owner, input, { assertIdentity = () => {} } = {}) {
     const { commandId, text, view } = input || {};
     if (typeof commandId !== 'string' || !commandId.trim() || commandId.length > 100 ||
       typeof text !== 'string' || !text.trim() || text.length > 1000 || !views.has(view)) {
       throw new AppError(422, 'INVALID_HELP_MESSAGE', 'Escreva uma dúvida de até 1.000 caracteres.');
     }
     return serialized(owner, async () => {
+      assertIdentity();
       const row = conversation(owner);
       const payloadHash = digest({ text, view });
       const prior = db.prepare('SELECT * FROM help_commands WHERE conversation_id=? AND command_id=?').get(row.id, commandId);
@@ -93,6 +94,7 @@ export function createHelp({ db, provider, now = () => Date.now() }) {
         if (prior.payload_hash !== payloadHash) throw new AppError(409, 'IDEMPOTENCY_CONFLICT', 'Este envio já foi utilizado com outro conteúdo.');
         return JSON.parse(prior.result);
       }
+      assertCanChat(owner);
       const current = envelope(owner);
       if (current.conversation.messages.length >= 80) throw new AppError(429, 'HELP_HISTORY_LIMIT', 'O histórico de ajuda atingiu o limite desta demonstração.');
       const since = new Date(now() - 60_000).toISOString();
@@ -113,6 +115,8 @@ export function createHelp({ db, provider, now = () => Date.now() }) {
       const actions = [...new Set(reply.actionIds)].map(id => ({ id, label: HELP_ACTIONS[id] }));
       db.exec('BEGIN IMMEDIATE');
       try {
+        assertIdentity();
+        assertCanChat(owner);
         // A concurrent account registration may have claimed this guest's data
         // while the provider was responding. Do not write under stale ownership.
         if (find(owner)?.id !== row.id) throw new AppError(409, 'HELP_IDENTITY_CHANGED', 'Sua identidade mudou. Abra a ajuda novamente antes de continuar.');

@@ -24,15 +24,18 @@ No episódio **A viagem de amanhã**, Roberto precisa de um aparelho antes de vi
 - **Experimentar:** repetir o exercício e comparar consequências, preservando a tentativa anterior.
 - **Continuar:** retomar sessões salvas; WhatsApp e exportação verificável fazem parte da expansão planejada.
 
+**Demonstração:** [abrir Frontline](https://frontline-production-4f55.up.railway.app). Versão de trabalho; atualizações podem causar uma breve indisponibilidade.
+
 ## Estado do projeto
 
 **Protótipo em desenvolvimento, criado para o DevDay Community Hackathon São Paulo de 23 de outubro de 2026.** A proposta parte do desafio #5, com mecânicas narrativas inspiradas no #10. O recorte de inscrição é a simulação de atendimento profissional.
 
-Este repositório disponibiliza uma **versão de trabalho do código**, junto à especificação de produto e às dez idealizações visuais. O código pode ser estudado e executado localmente; ainda não é uma versão final homologada. Consulte o [estado da implementação](docs/product/implementation-status.md) para conhecer as verificações e pendências desta publicação. A jornada completa, a fidelidade visual e a operação pública ainda precisam ser verificadas. Os ambientes e personagens são fictícios; resultados de treino não representam certificação profissional nem eficácia de aprendizagem comprovada.
+Este repositório disponibiliza uma **versão de trabalho do código**, junto à especificação de produto e às dez idealizações visuais. O código pode ser estudado e executado localmente; ainda não é uma versão final homologada. Consulte o [estado da implementação](docs/product/implementation-status.md) para conhecer as verificações e pendências desta publicação. A jornada completa e a fidelidade visual continuam em revisão. A publicação inicial teve HTML, assets e API verificados no endereço público. Os ambientes e personagens são fictícios; resultados de treino não representam certificação profissional nem eficácia de aprendizagem comprovada.
 
 | Camada | Estado desta versão |
 |---|---|
-| Web, API e persistência local | Código publicado como versão de trabalho; validação final pendente |
+| Web, API e persistência local | Runtime publicado e verificado em HTTPS; validação completa da jornada pendente |
+| Conta e ajuda Fio | Cadastro, login e guia contextual integrados; sem verificação de email ou recuperação de senha |
 | Cenário demonstrativo | Um personagem, três decisões e três finais definidos |
 | OpenAI | Adaptador e conversa contextual presentes; testes reais pontuais, sem garantia semântica geral |
 | WhatsApp, banco cloud e registro em blockchain | Integrações planejadas; não apresentadas como fluxo concluído |
@@ -122,4 +125,4 @@ docs/visuals/        Idealizações da experiência
 
 ## Dados e limites
 
-As sessões demonstrativas não executam empréstimos, reservas ou contatos reais. Na versão local, a identidade de visitante depende de um cookie no navegador; continuidade autenticada entre dispositivos ainda é uma extensão. Não use informações de clientes reais nos exercícios públicos. Uma avaliação deve se apoiar na conversa e indicar quando não houver evidência suficiente.
+As sessões demonstrativas não executam empréstimos, reservas ou contatos reais. É possível praticar como visitante ou criar uma conta. O cadastro preserva os exercícios do visitante atual; login não importa automaticamente o histórico de outro visitante. Email não é verificado e recuperação de senha não está implementada. Não use informações de clientes reais nos exercícios públicos. Uma avaliação deve se apoiar na conversa e indicar quando não houver evidência suficiente.

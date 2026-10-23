@@ -5,8 +5,11 @@ import { Library, Preparation, ScenarioReview, Practice, Review, Comparison, Cha
 import FioGuide from './mascot/FioGuide.jsx';
 import { AsyncState, StatusBadge } from './design-system/Components.jsx';
 import Sidebar from './design-system/Sidebar.jsx';
+import AuthPage from './auth/AuthPage.jsx';
 const complete = s => ['completed', 'incomplete', 'cancelled'].includes(s?.status);
 const titles = {
+  login: 'Entrar',
+  register: 'Criar conta',
   library: 'Biblioteca',
   reviews: 'Revisões',
   records: 'Registros',
@@ -39,6 +42,10 @@ function Surface({
   return <Component {...props} />;
 }
 export default function App() {
+  const [account, setAccount] = useState({ authenticated: false, user: null });
+  const [accountExpired, setAccountExpired] = useState(false);
+  const [identityEpoch, setIdentityEpoch] = useState(0);
+  const identityGeneration = useRef(0);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try {
       const saved = localStorage.getItem('frontline.sidebar.collapsed');
@@ -91,8 +98,9 @@ export default function App() {
     });
   };
   const refresh = async () => {
+    const generation = identityGeneration.current;
     const result = await api('/library');
-    setLibrary(result);
+    if (generation === identityGeneration.current) setLibrary(result);
     return result;
   };
   const refreshQuiet = async () => {
@@ -104,12 +112,22 @@ export default function App() {
   };
   useEffect(() => {
     let active = true;
+    const generation = identityGeneration.current;
+    api('/account').then(result => {
+      if (active && generation === identityGeneration.current) setAccount(result);
+    }).catch(problem => {
+      if (!active || generation !== identityGeneration.current || problem.status === 404) return;
+      if (problem.status === 401) {
+        setAccountExpired(true);
+        setError('Sua sessão expirou. Entre novamente ou continue como visitante.');
+      }
+    });
     Promise.all([api('/library'), api('/health')]).then(([data, status]) => {
-      if (active) {
+      if (active && generation === identityGeneration.current) {
         setLibrary(data);
         setHealth(status);
       }
-    }).catch(e => active && setError(e.message || 'Não foi possível carregar seu espaço.')).finally(() => active && setLoading(false));
+    }).catch(e => active && generation === identityGeneration.current && setError(e.message || 'Não foi possível carregar seu espaço.')).finally(() => active && generation === identityGeneration.current && setLoading(false));
     const onHash = () => setRoute(readRoute()),
       up = () => setOnline(true),
       down = () => setOnline(false);
@@ -125,16 +143,17 @@ export default function App() {
   }, []);
   useEffect(() => {
     let active = true;
+    const generation = identityGeneration.current;
     if (!route.id || currentSession.current?.id === route.id || !['practice', 'review', 'record', 'continuity'].includes(view)) {
       setSessionLoading(false);
       return;
     }
     setSessionLoading(true);
-    api(`/sessions/${encodeURIComponent(route.id)}`).then(data => active && remember(data.session)).catch(e => active && setError(e.message || 'Esta tentativa não pôde ser aberta.')).finally(() => active && setSessionLoading(false));
+    api(`/sessions/${encodeURIComponent(route.id)}`).then(data => active && generation === identityGeneration.current && remember(data.session)).catch(e => active && generation === identityGeneration.current && setError(e.message || 'Esta tentativa não pôde ser aberta.')).finally(() => active && generation === identityGeneration.current && setSessionLoading(false));
     return () => {
       active = false;
     };
-  }, [route.id, view]);
+  }, [route.id, view, identityEpoch]);
   useEffect(() => {
     content.current?.focus({
       preventScroll: true
@@ -159,6 +178,45 @@ export default function App() {
       setBusy(false);
     }
   };
+  const changeAccount = async (next, operation) => {
+    identityGeneration.current += 1;
+    setIdentityEpoch(identityGeneration.current);
+    setAccount(next);
+    setAccountExpired(false);
+    remember(null);
+    setDraft(null);
+    setScenario(null);
+    setComparison(null);
+    setLibrary({ scenarios: [], sessions: [] });
+    pending.current = null;
+    draftPending.current = null;
+    publishPending.current = null;
+    if (operation !== 'register') {
+      try {
+        Object.keys(localStorage).filter(key => key.startsWith('frontline:v1:')).forEach(key => localStorage.removeItem(key));
+      } catch { /* Storage can be unavailable; no account credentials are stored here. */ }
+    }
+    setLoading(true);
+    setSessionLoading(false);
+    navigate('library');
+    setRoute({ view: 'library', id: null });
+    try { await refresh(); }
+    catch { setNotice('Seu acesso foi atualizado. Atualize a biblioteca para carregar suas tentativas.'); }
+    finally { setLoading(false); }
+  };
+  const authenticate = (operation, credentials) => perform(async () => {
+    try {
+      const result = await api(`/account/${operation}`, 'POST', credentials);
+      await changeAccount(result, operation);
+    } catch (problem) {
+      if (problem.status === 404) throw new Error('O acesso por conta ainda não está disponível neste servidor. Você pode continuar como visitante.');
+      throw problem;
+    }
+  });
+  const logout = () => perform(async () => {
+    const result = await api('/account/logout', 'POST', {});
+    await changeAccount(result, 'logout');
+  });
   const recoverDraftConflict = async (problem, id) => {
     if (problem.status !== 409) return;
     draftPending.current = null;
@@ -351,20 +409,21 @@ export default function App() {
     active: ['records', 'record'].includes(view)
   }];
   const missingSession = ['practice', 'review', 'record'].includes(view) && (!session || route.id && session.id !== route.id);
+  if (view === 'login' || view === 'register') return <AuthPage mode={view} onNavigate={navigate} onVisitor={() => accountExpired ? logout() : home()} onSubmit={authenticate} busy={busy} error={error || (accountExpired ? 'Sua sessão expirou. Entre novamente ou continue como visitante.' : '')} online={online} />;
   return <div className={`app-shell frontline-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}`} style={{ '--sidebar-width': sidebarCollapsed ? '80px' : '244px' }}>
   <a className="skip-link" href="#main-content" onClick={e => {
       e.preventDefault();
       content.current?.focus();
     }}>Pular para o conteúdo</a>
-  <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(value => !value)} sections={sections} onNavigate={id => id === 'library' ? home() : navigate(id)} onHome={home} busy={busy} />
+  <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(value => !value)} sections={sections} onNavigate={id => id === 'library' ? home() : navigate(id)} onHome={home} busy={busy} user={account.user} onLogin={() => navigate('login')} onLogout={logout} />
   <main className="main" ref={content} id="main-content" tabIndex={-1} aria-busy={busy || loading || sessionLoading}>
-   <header className="topbar"><div className="breadcrumb"><span>Seu espaço</span><span aria-hidden="true">/</span><strong>{titles[view]}</strong></div><div className="topbar-meta">{health && <StatusBadge tone="neutral">{health.providerMode === 'openai' ? 'Conversa com IA' : 'Modo demonstração'}</StatusBadge>}<span className="simulation-label">Dados fictícios</span></div></header>
+   <header className="topbar"><div className="breadcrumb"><span>Seu espaço</span><span aria-hidden="true">/</span><strong>{titles[view]}</strong></div><div className="topbar-meta">{health && <StatusBadge tone="neutral">{health.providerMode === 'openai' ? 'Conversa com IA' : 'Modo demonstração'}</StatusBadge>}<span className="simulation-label">Dados fictícios</span><button className="mobile-account" disabled={busy} onClick={account.authenticated ? logout : () => navigate('login')} aria-label={account.authenticated ? `Sair da conta de ${account.user?.name}` : 'Entrar na sua conta'}>{account.authenticated ? 'Sair' : 'Entrar'}</button></div></header>
    {!online && <div className="notice" role="status"><WifiOff size={18} /><span>Sem conexão. Os envios ficam indisponíveis até a reconexão.</span></div>}
    {notice && <div className="notice" role="status"><span>{notice}</span><button className="text-button" disabled={busy} onClick={() => perform(refresh)}>Atualizar biblioteca</button></div>}
-   {error && (view !== 'practice' || missingSession) && <div className="global-error" role="alert"><span>{error}</span><button className="text-button" disabled={busy} onClick={() => perform(refresh)}><RefreshCw size={16} />Atualizar biblioteca</button></div>}
+   {error && (view !== 'practice' || missingSession) && <div className="global-error" role="alert"><span>{error}</span>{accountExpired ? <button className="text-button" disabled={busy} onClick={logout}>Continuar como visitante</button> : <button className="text-button" disabled={busy} onClick={() => perform(refresh)}><RefreshCw size={16} />Atualizar biblioteca</button>}</div>}
    {!['library', 'reviews', 'records'].includes(view) && <button className="back-link" disabled={busy} onClick={home}><ArrowLeft size={16} />Biblioteca</button>}
    {loading || sessionLoading ? <AsyncState loading title={loading ? 'Carregando seu espaço…' : 'Abrindo tentativa…'} /> : missingSession ? <AsyncState title="Escolha uma tentativa" description="Abra uma sessão salva na biblioteca para continuar." action={<button className="primary" onClick={home}>Ir para a biblioteca</button>} /> : <>
-    {['library', 'reviews', 'records'].includes(view) && <Surface name="Library" {...library} variant={view} busy={busy} providerMode={health?.providerMode} onStart={start} onOpen={id => open(id, view === 'records' ? 'record' : undefined)} onCreate={() => {
+    {['library', 'reviews', 'records'].includes(view) && <Surface key={identityEpoch} name="Library" {...library} userName={account.user?.name || 'Visitante'} variant={view} busy={busy} providerMode={health?.providerMode} onStart={start} onOpen={id => open(id, view === 'records' ? 'record' : undefined)} onCreate={() => {
           setDraft(null);
           draftPending.current = null;
           publishPending.current = null;
@@ -387,6 +446,6 @@ export default function App() {
     {view === 'record' && session && <Surface name="Record" session={session} busy={busy} onBack={() => showReview()} onReview={() => showReview()} />}
    </>}
   </main>
-  <FioGuide view={view} session={session} busy={busy || loading || sessionLoading} onNavigate={navigate} />
+  <FioGuide view={view} session={session} busy={busy || loading || sessionLoading} onNavigate={navigate} accountKey={`${account.user?.id || 'guest'}:${identityEpoch}`} />
  </div>;
 }

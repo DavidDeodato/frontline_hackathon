@@ -1,5 +1,7 @@
 # Frontline API — contrato v0.1
 
+Extensão aditiva v0.1f: [ACCOUNT_HELP_CONTRACT.md](ACCOUNT_HELP_CONTRACT.md) define conta, identidade, reivindicação de dados de visitante e ajuda conversacional isolada. Não altera os DTOs de treino existentes. O runtime de hospedagem está documentado em [runtime/README.md](../runtime/README.md).
+
 Correção aditiva v0.1e: [TURN_CONTRACT.md](TURN_CONTRACT.md) condiciona a fala real ao resultado do domínio, com candidato em memória e persistência única após retorno válido. Não muda endpoints ou DTOs públicos existentes.
 
 Extensão compatível de autoria e revisão conversacional: [AUTHOR_CONTRACT.md](AUTHOR_CONTRACT.md), author.v0.2a / provider ai.v0.3. Novo fluxo usa ferramenta real, versões de draft e expectedVersion ao publicar; endpointsP0 permanecem compatíveis.

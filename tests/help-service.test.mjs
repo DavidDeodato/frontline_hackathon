@@ -50,6 +50,8 @@ test('guia não declara canais ativos nem responde pelo participante', async t =
   assert.match(channels.conversation.messages.at(-1).text, /não está habilitado/);
   const training = await help.sendMessage('one', input('training', 'O que responder para Roberto?'));
   assert.match(training.conversation.messages.at(-1).text, /não responder pelo participante/);
+  const exporting = await help.sendMessage('one', input('export', 'Como exportar uma revisão?'));
+  assert.equal(exporting.actions[0].id, 'open_records');
 });
 
 test('limite por dono não impede reenviar comando já confirmado', async t => {
@@ -83,4 +85,23 @@ test('troca de dono durante uma resposta não grava na conta com identidade anti
   release();
   await assert.rejects(request, { code: 'HELP_IDENTITY_CHANGED' });
   assert.equal(help.getConversation('user:1').conversation.messages.length, 0);
+});
+
+test('guarda de treino é consultada antes do provedor e antes da gravação', async t => {
+  const { store } = setup(t);
+  let checks = 0, calls = 0;
+  const help = createHelp({ db: store.db, provider: { mode: 'openai', async help() { calls++; return { text: 'Olá', actionIds: [] }; } }, assertCanChat() { if (++checks === 2) throw Error('training started'); } });
+  await assert.rejects(help.sendMessage('one', input()), /training started/);
+  assert.equal(calls, 1);
+  assert.equal(help.getConversation('one').conversation.messages.length, 0);
+  const blocked = createHelp({ db: store.db, provider: { mode: 'openai', async help() { calls++; } }, assertCanChat() { throw Error('active training'); } });
+  await assert.rejects(blocked.sendMessage('one', input()), /active training/);
+  assert.equal(calls, 1);
+});
+
+test('revogação da sessão enquanto o provedor responde impede persistir o resultado', async t => {
+  const { help } = setup(t, { mode: 'openai', async help() { return { text: 'Biblioteca', actionIds: [] }; } });
+  let checks = 0;
+  await assert.rejects(help.sendMessage('one', input(), { assertIdentity() { if (++checks === 2) throw Error('revoked'); } }), /revoked/);
+  assert.equal(help.getConversation('one').conversation.messages.length, 0);
 });

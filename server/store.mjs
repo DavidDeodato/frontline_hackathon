@@ -96,6 +96,8 @@ export function openStore(path) {
     });
   }
   return { db, identity, getSession, getScenario, getDraft, checkDraftVersion, draftReceipt, saveDraftResult, transaction, insertSession, receipt, commit,
+    hasGuest(owner) { return Boolean(q('SELECT hash FROM guests WHERE hash=?',owner)); },
+    hasActiveTraining(owner) { return Boolean(q("SELECT id FROM sessions WHERE owner=? AND json_extract(data,'$.status') IN ('active','paused') LIMIT 1",owner)); },
     library(owner) { return { scenarios: db.prepare('SELECT data FROM scenarios WHERE owner=? OR owner=? ORDER BY id, version DESC').all(owner, '*').map(r => JSON.parse(r.data)), sessions: db.prepare('SELECT data FROM sessions WHERE owner=? ORDER BY rowid DESC LIMIT 100').all(owner).map(r => wireSession(JSON.parse(r.data))) }; },
     saveDraft(owner, d) { return saveDraftResult(owner,d); },
     draftVersions(owner,id) { getDraft(owner,id);return db.prepare('SELECT * FROM draft_versions WHERE id=? AND owner=? ORDER BY version DESC').all(id,owner).map(r=>({version:r.version,createdAt:r.created_at,...(r.request_text!==null?{requestText:r.request_text}:{}),draft:JSON.parse(r.data)})); },
