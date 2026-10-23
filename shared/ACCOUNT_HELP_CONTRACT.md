@@ -1,5 +1,9 @@
 # Conta e ajuda — account-help.v0.1
 
+## Entrada explícita — atualização v0.1b
+
+Ao abrir o site, a interface aguarda a consulta da conta. Sem conta autenticada e sem escolha explícita de visitante nesta aba, apresenta login. Erro de consulta não concede acesso automático. O botão Continuar como visitante registra uma escolha deliberada; logout volta ao login. Contas válidas preservam o acesso. Links de preparação do WhatsApp e seus textos devem sobreviver à passagem pelo login ou à escolha de visitante. Este controle de entrada da interface não elimina a API de visitante nem cria autenticação pelo WhatsApp.
+
 Extensão aditiva. Visitante, treino e versões existentes são preservados.
 
 ## Conta

@@ -6,6 +6,7 @@ import FioGuide from './mascot/FioGuide.jsx';
 import { AsyncState, StatusBadge } from './design-system/Components.jsx';
 import Sidebar from './design-system/Sidebar.jsx';
 import AuthPage from './auth/AuthPage.jsx';
+import { accessState, loginHash, resumeHash } from './auth/access.js';
 const complete = s => ['completed', 'incomplete', 'cancelled'].includes(s?.status);
 const titles = {
   login: 'Entrar',
@@ -23,7 +24,7 @@ const titles = {
   record: 'Registro e exportação'
 };
 function readRoute() {
-  const [view, rawId] = location.hash.replace(/^#\/?/, '').split('/');
+  const [view, rawId] = location.hash.replace(/^#\/?/, '').split('?')[0].split('/');
   let id = null;
   try {
     id = rawId ? decodeURIComponent(rawId) : null;
@@ -44,6 +45,11 @@ function Surface({
 export default function App() {
   const [account, setAccount] = useState({ authenticated: false, user: null });
   const [accountExpired, setAccountExpired] = useState(false);
+  const [accountChecked, setAccountChecked] = useState(false);
+  const [accountUncertain, setAccountUncertain] = useState(false);
+  const [guestSelected, setGuestSelected] = useState(false);
+  const entryHash = useRef('');
+  const access = accessState(accountChecked, account.authenticated, guestSelected);
   const [identityEpoch, setIdentityEpoch] = useState(0);
   const identityGeneration = useRef(0);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
@@ -116,18 +122,13 @@ export default function App() {
     api('/account').then(result => {
       if (active && generation === identityGeneration.current) setAccount(result);
     }).catch(problem => {
-      if (!active || generation !== identityGeneration.current || problem.status === 404) return;
+      if (!active || generation !== identityGeneration.current) return;
+      setAccountUncertain(true);
       if (problem.status === 401) {
         setAccountExpired(true);
         setError('Sua sessão expirou. Entre novamente ou continue como visitante.');
-      }
-    });
-    Promise.all([api('/library'), api('/health')]).then(([data, status]) => {
-      if (active && generation === identityGeneration.current) {
-        setLibrary(data);
-        setHealth(status);
-      }
-    }).catch(e => active && generation === identityGeneration.current && setError(e.message || 'Não foi possível carregar seu espaço.')).finally(() => active && generation === identityGeneration.current && setLoading(false));
+      } else setError('Não foi possível verificar seu acesso. Tente entrar novamente quando a conexão estiver disponível.');
+    }).finally(() => active && generation === identityGeneration.current && setAccountChecked(true));
     const onHash = () => setRoute(readRoute()),
       up = () => setOnline(true),
       down = () => setOnline(false);
@@ -142,9 +143,26 @@ export default function App() {
     };
   }, []);
   useEffect(() => {
+    if (access !== 'login' || ['login', 'register'].includes(view)) return;
+    entryHash.current = location.hash || '#/library';
+    history.replaceState(history.state, '', `${location.pathname}${location.search}${loginHash(location.hash)}`);
+    setRoute(readRoute());
+  }, [access, view]);
+  useEffect(() => {
+    if (access !== 'allowed') return;
     let active = true;
     const generation = identityGeneration.current;
-    if (!route.id || currentSession.current?.id === route.id || !['practice', 'review', 'record', 'continuity'].includes(view)) {
+    setLoading(true);
+    Promise.all([api('/library'), api('/health')]).then(([data, status]) => {
+      if (active && generation === identityGeneration.current) { setLibrary(data); setHealth(status); }
+    }).catch(problem => active && generation === identityGeneration.current && setError(problem.message || 'Não foi possível carregar seu espaço.'))
+      .finally(() => active && generation === identityGeneration.current && setLoading(false));
+    return () => { active = false; };
+  }, [access, identityEpoch]);
+  useEffect(() => {
+    let active = true;
+    const generation = identityGeneration.current;
+    if (access !== 'allowed' || !route.id || currentSession.current?.id === route.id || !['practice', 'review', 'record', 'continuity'].includes(view)) {
       setSessionLoading(false);
       return;
     }
@@ -153,7 +171,7 @@ export default function App() {
     return () => {
       active = false;
     };
-  }, [route.id, view, identityEpoch]);
+  }, [route.id, view, identityEpoch, access]);
   useEffect(() => {
     content.current?.focus({
       preventScroll: true
@@ -183,6 +201,9 @@ export default function App() {
     setIdentityEpoch(identityGeneration.current);
     setAccount(next);
     setAccountExpired(false);
+    setAccountUncertain(false);
+    setAccountChecked(true);
+    setGuestSelected(operation === 'visitor');
     remember(null);
     setDraft(null);
     setScenario(null);
@@ -196,13 +217,17 @@ export default function App() {
         Object.keys(localStorage).filter(key => key.startsWith('frontline:v1:')).forEach(key => localStorage.removeItem(key));
       } catch { /* Storage can be unavailable; no account credentials are stored here. */ }
     }
-    setLoading(true);
+    setLoading(operation !== 'logout');
     setSessionLoading(false);
-    navigate('library');
-    setRoute({ view: 'library', id: null });
-    try { await refresh(); }
-    catch { setNotice('Seu acesso foi atualizado. Atualize a biblioteca para carregar suas tentativas.'); }
-    finally { setLoading(false); }
+    if (operation === 'logout') {
+      entryHash.current = '';
+      navigate('login');
+      setRoute({ view: 'login', id: null });
+    } else {
+      location.hash = resumeHash(location.hash, entryHash.current);
+      entryHash.current = '';
+      setRoute(readRoute());
+    }
   };
   const authenticate = (operation, credentials) => perform(async () => {
     try {
@@ -216,6 +241,17 @@ export default function App() {
   const logout = () => perform(async () => {
     const result = await api('/account/logout', 'POST', {});
     await changeAccount(result, 'logout');
+  });
+  const continueAsVisitor = () => perform(async () => {
+    if (accountExpired || accountUncertain || account.authenticated) {
+      const result = await api('/account/logout', 'POST', {});
+      await changeAccount(result, 'visitor');
+    } else {
+      setGuestSelected(true);
+      location.hash = resumeHash(location.hash, entryHash.current);
+      entryHash.current = '';
+      setRoute(readRoute());
+    }
   });
   const recoverDraftConflict = async (problem, id) => {
     if (problem.status !== 409) return;
@@ -409,7 +445,13 @@ export default function App() {
     active: ['records', 'record'].includes(view)
   }];
   const missingSession = ['practice', 'review', 'record'].includes(view) && (!session || route.id && session.id !== route.id);
-  if (view === 'login' || view === 'register') return <AuthPage mode={view} onNavigate={navigate} onVisitor={() => accountExpired ? logout() : home()} onSubmit={authenticate} busy={busy} error={error || (accountExpired ? 'Sua sessão expirou. Entre novamente ou continue como visitante.' : '')} online={online} />;
+  if (access === 'checking') return <AsyncState loading title="Verificando seu acesso…" />;
+  if (access === 'login' || view === 'login' || view === 'register') return <AuthPage mode={view === 'register' ? 'register' : 'login'} onNavigate={(next) => {
+    const query = location.hash.includes('?') ? location.hash.slice(location.hash.indexOf('?')) : '';
+    location.hash = `#/${next}${query}`;
+    setRoute(readRoute());
+    setError('');
+  }} onVisitor={continueAsVisitor} onSubmit={authenticate} busy={busy} error={error || (accountExpired ? 'Sua sessão expirou. Entre novamente ou continue como visitante.' : '')} online={online} />;
   return <div className={`app-shell frontline-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}`} style={{ '--sidebar-width': sidebarCollapsed ? '80px' : '244px' }}>
   <a className="skip-link" href="#main-content" onClick={e => {
       e.preventDefault();
