@@ -1,5 +1,7 @@
 # Contexto e fontes
 
+> Registro da concepção inicial, anterior à implementação. Para o estado atual do produto e da entrega, consulte [estado da implementação](product/implementation-status.md) e [roteiro atual de demonstração](product/demo.md). As pendências e descrições de ausência de código abaixo pertencem àquele momento inicial.
+
 Consolidação em 23/10/2026 do [chat de origem](https://chatgpt.com/share/6adb8855-c660-83e9-a31d-bb5154ef496c). A finalidade é transformar a conversa em definição de produto rastreável, sem apresentar sugestões do GPT como decisões já aprovadas ou funcionalidades implementadas.
 
 ## Como a proposta evoluiu

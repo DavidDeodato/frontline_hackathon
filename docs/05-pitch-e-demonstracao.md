@@ -1,5 +1,7 @@
 # Pitch e demonstração
 
+> Registro da concepção inicial, anterior à implementação. Para o estado atual do produto e da entrega, consulte [estado da implementação](product/implementation-status.md) e [roteiro atual de demonstração](product/demo.md). As pendências e descrições de ausência de código abaixo pertencem àquele momento inicial.
+
 Roteiro consolidado a partir da versão revisada do chat. Duração-alvo: 2min55s, com cinco segundos de margem até o limite informado. O tempo precisa ser medido na gravação. As falas sobre funcionalidades dependem da implementação e de demonstração real.
 
 ## Roteiro de gravação

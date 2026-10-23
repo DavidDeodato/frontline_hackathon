@@ -1,5 +1,7 @@
 # MVP e critérios de aceite
 
+> Registro da concepção inicial, anterior à implementação. Para o estado atual do produto e da entrega, consulte [estado da implementação](product/implementation-status.md) e [roteiro atual de demonstração](product/demo.md). As pendências e descrições de ausência de código abaixo pertencem àquele momento inicial.
+
 MVP significa produto mínimo viável. Aqui, a prioridade proposta é uma sessão completa de treinamento, da apresentação do caso ao feedback, antes de expandir personagens ou funcionalidades.
 
 ## Escopo derivado do chat

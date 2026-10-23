@@ -1,5 +1,7 @@
 # Produto e personas
 
+> Registro da concepção inicial, anterior à implementação. Para o estado atual do produto e da entrega, consulte [estado da implementação](product/implementation-status.md) e [roteiro atual de demonstração](product/demo.md). As pendências e descrições de ausência de código abaixo pertencem àquele momento inicial.
+
 ## Problema e proposta de valor
 
 Hipótese H01: atendentes iniciantes conhecem procedimentos, mas têm poucas oportunidades seguras de praticar conversas difíceis e receber feedback específico.

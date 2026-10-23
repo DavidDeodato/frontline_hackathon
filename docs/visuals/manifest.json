@@ -1,0 +1,357 @@
+{
+  "schemaVersion": "frontline.visual-platform/1.0",
+  "createdOn": "2026-10-23",
+  "brand": "Frontline",
+  "kind": "concept_gallery_not_functional_application",
+  "implementationStatus": "implementation_in_progress_no_parity_verified",
+  "humanVisualApproval": "pending",
+  "sourceLock": "../product/style-guide.md",
+  "imageModelVersion": "not_exposed",
+  "frameDenominator": 10,
+  "userStoryDenominator": 16,
+  "frames": [
+    {
+      "id": "F01",
+      "slug": "biblioteca",
+      "title": "Biblioteca",
+      "section": "Praticar",
+      "file": "images/flows/01-biblioteca.png",
+      "priority": "P0",
+      "us": [
+        "US-01",
+        "US-13"
+      ],
+      "state": "library_with_completed_attempts",
+      "time": "Depois das tentativas A e B; não é o instante da conversa em F04.",
+      "actions": [
+        "Criar situação",
+        "Abrir revisão",
+        "Continuar quando houver sessão pausada"
+      ],
+      "effect": "Seleciona contexto e tentativa corretos; navegar não cria uma sessão.",
+      "data": [
+        "ScenarioVersion",
+        "TrainingSession",
+        "Assessment"
+      ],
+      "acceptance": "Mesmos nomes, versão e finais das duas tentativas. Nenhuma contagem apresentada como ganho de habilidade."
+    },
+    {
+      "id": "F02",
+      "slug": "contexto",
+      "title": "Criar situação",
+      "section": "Praticar",
+      "file": "images/flows/02-contexto-v2.png",
+      "priority": "P0",
+      "us": [
+        "US-02",
+        "US-03",
+        "US-16"
+      ],
+      "state": "draft_editing",
+      "time": "Antes de publicar a versão do exercício.",
+      "actions": [
+        "Descrever contexto",
+        "Informar regras",
+        "Gerar preparação"
+      ],
+      "effect": "Cria rascunho revisável; texto é preservado se geração falhar.",
+      "data": [
+        "ContextDraft",
+        "ScenarioVersion draft"
+      ],
+      "acceptance": "Relato, dados ausentes e template de ambiente são distintos; não promete geração arbitrária de mundos."
+    },
+    {
+      "id": "F03",
+      "slug": "revisao",
+      "title": "Revisar contexto",
+      "section": "Praticar",
+      "file": "images/flows/03-revisao-v2.png",
+      "priority": "P0",
+      "us": [
+        "US-03",
+        "US-04"
+      ],
+      "state": "scenario_ready_for_confirmation",
+      "time": "Antes da primeira tentativa, versão 1 ainda a confirmar.",
+      "actions": [
+        "Corrigir fato",
+        "Marcar desconhecido",
+        "Confirmar e iniciar"
+      ],
+      "effect": "Congela fatos, regras, personagem e rubrica para a tentativa.",
+      "data": [
+        "ContextDraft",
+        "ScenarioVersion",
+        "RubricVersion"
+      ],
+      "acceptance": "Exatamente três critérios; reparo sem prazo confirmado; política e condições explícitas. Nenhum final já alcançado."
+    },
+    {
+      "id": "F04",
+      "slug": "ensaio",
+      "title": "Ensaio 2.5D",
+      "section": "Praticar",
+      "file": "images/scene/04-ensaio-v2.png",
+      "priority": "P0",
+      "us": [
+        "US-05",
+        "US-07",
+        "US-08"
+      ],
+      "state": "TRY-B_awaiting_B06",
+      "time": "Depois de B05 e antes de B06; 5 de 8 mensagens.",
+      "actions": [
+        "Consultar informações",
+        "Escrever resposta",
+        "Enviar resposta",
+        "Alternar para lista"
+      ],
+      "effect": "Fala preservada; regra valida consequência. Proposta ainda não é compromisso concluído.",
+      "data": [
+        "TrainingSession",
+        "Message",
+        "Decision",
+        "policyRules"
+      ],
+      "acceptance": "Roberto único interlocutor; preparo 2/2; pode combinar o empréstimo; confirmação de devolução em 27 out ainda em rascunho."
+    },
+    {
+      "id": "F05",
+      "slug": "documento",
+      "title": "Documento e continuidade",
+      "section": "Praticar",
+      "file": "images/scene/05-documento.png",
+      "priority": "P0",
+      "us": [
+        "US-06",
+        "US-09",
+        "US-13",
+        "US-16"
+      ],
+      "state": "TRY-B_document_open",
+      "time": "Mesmo instante de F04; consulta não acrescenta fala.",
+      "actions": [
+        "Ler política",
+        "Voltar à conversa",
+        "Pausar",
+        "Retomar"
+      ],
+      "effect": "Reabrir documento não soma preparo. Pausa salva; rascunho e estado confirmado permanecem.",
+      "data": [
+        "TrainingSession",
+        "document.opened",
+        "Checkpoint"
+      ],
+      "acceptance": "5 de 8 mensagens; preparo não sobe além de 2; regras iguais F03/F04. Pausar não é concluir."
+    },
+    {
+      "id": "F06",
+      "slug": "avaliacao",
+      "title": "Avaliação",
+      "section": "Revisões",
+      "file": "images/scene/06-avaliacao.png",
+      "priority": "P0",
+      "us": [
+        "US-08",
+        "US-10"
+      ],
+      "state": "TRY-B_completed_END-01",
+      "time": "Após B08; tentativa B encerrada.",
+      "actions": [
+        "Abrir evidência",
+        "Ler melhoria",
+        "Praticar outra resposta"
+      ],
+      "effect": "Avaliação ligada à versão, rubrica e transcrição encerrada.",
+      "data": [
+        "Assessment",
+        "Citation",
+        "TrainingSession"
+      ],
+      "acceptance": "Alternativa viável combinada; três critérios; citações literais; sem nota de competência, sem reparo garantido."
+    },
+    {
+      "id": "F07",
+      "slug": "comparacao",
+      "title": "Comparar tentativas",
+      "section": "Revisões",
+      "file": "images/flows/07-comparacao.png",
+      "priority": "P0",
+      "us": [
+        "US-11",
+        "US-12"
+      ],
+      "state": "TRY-A_TRY-B_completed_comparison",
+      "time": "Após encerrar A e B; mesma versão 1.",
+      "actions": [
+        "Localizar divergência",
+        "Selecionar fala",
+        "Praticar outra resposta"
+      ],
+      "effect": "Cria novo percurso preservando o original; comparação explicita contexto e compromisso.",
+      "data": [
+        "Checkpoint",
+        "TrainingSession",
+        "Message",
+        "Assessment"
+      ],
+      "acceptance": "A: promessa sem respaldo. B: alternativa viável combinada. Mesmos fatos; nenhuma melhora de habilidade inferida."
+    },
+    {
+      "id": "F08",
+      "slug": "whatsapp",
+      "title": "Conectar WhatsApp",
+      "section": "Conexões",
+      "file": "images/channels/08-whatsapp-v2.png",
+      "priority": "P1",
+      "us": [
+        "US-14"
+      ],
+      "state": "channel_not_linked",
+      "time": "Fluxo futuro de conexão; não representa uma integração já funcional.",
+      "actions": [
+        "Iniciar vínculo",
+        "Confirmar no app"
+      ],
+      "effect": "Token temporário e confirmação ligam canal a identidade autenticada.",
+      "data": [
+        "ChannelLink",
+        "account identity"
+      ],
+      "acceptance": "Sem número/token/QR real. Identidade autenticada necessária. A existência de um adaptador não comprova a integração do produto."
+    },
+    {
+      "id": "F09",
+      "slug": "continuidade",
+      "title": "Retomar pelo WhatsApp",
+      "section": "Conexões",
+      "file": "images/channels/09-continuidade-v2.png",
+      "priority": "P1",
+      "us": [
+        "US-13",
+        "US-15",
+        "US-16"
+      ],
+      "state": "proposed_channel_linked_session_resume",
+      "time": "Estado projetado após vínculo e pausa do mesmo treino; não é prova operacional.",
+      "actions": [
+        "Enviar contexto",
+        "Pedir retomada",
+        "Abrir na web",
+        "Revogar vínculo"
+      ],
+      "effect": "Mesma sessão e limites; 2.5D no navegador. Retry não duplica sessão.",
+      "data": [
+        "ChannelLink",
+        "TrainingSession",
+        "CommandReceipt"
+      ],
+      "acceptance": "Mostrar continuidade contextual, não dois chats independentes; estado projetado claramente sinalizado na galeria."
+    },
+    {
+      "id": "F10",
+      "slug": "registro",
+      "title": "Registro e exportação",
+      "section": "Registros",
+      "file": "images/channels/10-registro.png",
+      "priority": "P1",
+      "us": [
+        "EXT-01"
+      ],
+      "state": "export_ready_anchor_not_requested",
+      "time": "Após a avaliação; registro opcional ainda não ancorado.",
+      "actions": [
+        "Exportar registro",
+        "Solicitar recibo opcional",
+        "Verificar cópia"
+      ],
+      "effect": "Exportação portátil; ancoragem assíncrona de integridade, separada da avaliação.",
+      "data": [
+        "ExportManifest",
+        "hashes",
+        "anchorStatus"
+      ],
+      "acceptance": "Sem atestar habilidade ou verdade; sem dados pessoais na cadeia; não registrado/pendente é padrão."
+    }
+  ],
+  "sharedStateCoverage": [
+    {
+      "component": "C-EMPTY",
+      "states": [
+        "biblioteca vazia",
+        "comparação com uma tentativa"
+      ],
+      "surface": [
+        "F01",
+        "F07"
+      ],
+      "representation": "specified_reusable_component_no_separate_raster"
+    },
+    {
+      "component": "C-ASYNC",
+      "states": [
+        "gerando",
+        "enviando",
+        "aguardando avaliação",
+        "falhou"
+      ],
+      "surface": [
+        "F02",
+        "F04",
+        "F06"
+      ],
+      "representation": "specified_reusable_component_no_separate_raster"
+    },
+    {
+      "component": "C-RECOVER",
+      "states": [
+        "sem conexão",
+        "rascunho preservado",
+        "conflito de versão",
+        "retomar"
+      ],
+      "surface": [
+        "F04",
+        "F05",
+        "F09"
+      ],
+      "representation": "specified_reusable_component_no_separate_raster"
+    },
+    {
+      "component": "C-AUTH",
+      "states": [
+        "autenticação necessária",
+        "vínculo expirado",
+        "revogado",
+        "acesso negado"
+      ],
+      "surface": [
+        "F08",
+        "F09"
+      ],
+      "representation": "specified_reusable_component_no_separate_raster"
+    },
+    {
+      "component": "C-INTEGRITY",
+      "states": [
+        "não solicitado",
+        "pendente",
+        "confirmado",
+        "falhou",
+        "cópia divergente"
+      ],
+      "surface": [
+        "F10"
+      ],
+      "representation": "specified_reusable_component_no_separate_raster"
+    }
+  ],
+  "limits": [
+    "Cobertura de histórias e capacidades não equivale a imagem para toda combinação de estados.",
+    "Estados P1 são propostos; dependem de implementação e verificação no Frontline.",
+    "As imagens são referências de design; a validação visual do aplicativo permanece independente.",
+    "Galeria canônica em DOM evita logos divergentes; não prova paridade com o futuro aplicativo."
+  ]
+}

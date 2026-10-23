@@ -1,5 +1,7 @@
 # Mercado e modelo comercial
 
+> Registro da concepção inicial, anterior à implementação. Para o estado atual do produto e da entrega, consulte [estado da implementação](product/implementation-status.md) e [roteiro atual de demonstração](product/demo.md). As pendências e descrições de ausência de código abaixo pertencem àquele momento inicial.
+
 Modelo proposto no chat: assinatura B2B por licença para treinamento de equipes de atendimento. B2B significa venda de empresa para empresa. Preço, adoção e capacidade de venda ainda são hipóteses.
 
 ## Base e método

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+ <title id="title">Frontline — proposta de símbolo</title>
+ <path fill="#161C22" d="M16 40C16 22 29 10 47 10h53c13 0 21 7 21 18s-8 18-21 18H54c-9 0-15 6-15 15v20h39c13 0 21 7 21 18s-8 18-21 18H43l-21 20c-3 3-6 1-6-3Z" transform="translate(0 -7) scale(1 .95)"/>
+ <path fill="#37CFDB" d="M52 48h40c12 0 19 6 19 16s-7 16-19 16H57L40 92V61c0-8 5-13 12-13Z"/>
+</svg>

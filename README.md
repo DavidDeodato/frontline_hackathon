@@ -2,33 +2,140 @@
 
 **Cada escolha tem uma consequência.**
 
-Proposta de simulador narrativo de atendimento profissional: praticar uma conversa difícil com um cliente fictício, observar as consequências das respostas e receber feedback com exemplos da própria conversa.
+Pratique conversas difíceis, entenda consequências e experimente outra resposta.
 
-Projeto do DevDay Community Hackathon São Paulo, de 23 de outubro de 2026. A proposta parte do desafio #5, com mecânicas narrativas inspiradas no #10.
+Frontline é um simulador narrativo de atendimento profissional. A pessoa prepara uma situação, conversa com um cliente fictício, consulta informações no ambiente e recebe uma avaliação ligada às próprias falas. Uma nova tentativa permite comparar decisões sem colocar um cliente real em risco.
+
+![Frontline em execução: cena 2.5D, documentos consultados e conversa pausada](docs/product/images/frontline-practice.jpg)
+
+*Captura da aplicação pública em 23 de outubro de 2026: exercício fictício pausado após consultar documentos. As idealizações de design continuam disponíveis na galeria abaixo.*
+
+## Para quem
+
+Mariana, nossa persona de design, está começando no suporte de uma empresa de comércio eletrônico. Ela conhece o procedimento, mas precisa praticar como explicar limites e negociar alternativas quando um cliente está frustrado. Roberto é o personagem do exercício — o cliente atendido por Mariana, não outro usuário da plataforma.
+
+No episódio **A viagem de amanhã**, Roberto precisa de um aparelho antes de viajar. O reparo não tem prazo confirmado. Existe uma alternativa de empréstimo, mas suas condições precisam ser consultadas e confirmadas. O que Mariana responde muda o compromisso que pode assumir.
+
+## A experiência
+
+- **Preparar:** escolher um episódio ou descrever uma situação e revisar seu contexto.
+- **Praticar:** conversar por texto em uma sala 2.5D com ordem de serviço, política e agenda.
+- **Compreender:** receber três critérios de avaliação, trechos da conversa e uma melhoria concreta.
+- **Experimentar:** repetir o exercício e comparar consequências, preservando a tentativa anterior.
+- **Continuar:** retomar sessões salvas, exportar tentativas e verificar a integridade da cópia. WhatsApp permanece uma expansão planejada.
+
+**Demonstração:** [abrir Frontline](https://frontline-production-4f55.up.railway.app). Versão de trabalho; atualizações podem causar uma breve indisponibilidade.
 
 ## Estado do projeto
 
-Este repositório começa pela definição do produto. Ainda não contém aplicação executável, integração com IA, testes de software, vídeo ou endereço de demonstração publicado. As funcionalidades descritas são propostas para implementação e validação.
+**Protótipo em desenvolvimento, criado para o DevDay Community Hackathon São Paulo de 23 de outubro de 2026.** A proposta parte do desafio #5, com mecânicas narrativas inspiradas no #10. O recorte de inscrição é a simulação de atendimento profissional.
 
-## Experiência proposta
+Este repositório disponibiliza uma **versão de trabalho do código**, junto à especificação de produto e às dez idealizações visuais. O código pode ser estudado e executado localmente; ainda não é uma versão final homologada. Consulte o [estado da implementação](docs/product/implementation-status.md) para conhecer as verificações e pendências desta publicação. A jornada completa e a fidelidade visual continuam em revisão. A publicação atual teve HTML, assets, API, cadastro/login e retenção de sessão verificados no endereço público. Os ambientes e personagens são fictícios; resultados de treino não representam certificação profissional nem eficácia de aprendizagem comprovada.
 
-1. Conhecer Roberto e o caso de uma entrega atrasada.
-2. Responder livremente por texto, em uma sessão de até oito interações do participante.
-3. Observar mudanças no comportamento do cliente e nos indicadores do jogo.
-4. Receber uma avaliação por três critérios, com evidências da conversa e uma sugestão concreta de melhoria.
-5. Experimentar outra abordagem e comparar os resultados.
+| Camada | Estado desta versão |
+|---|---|
+| Web, API e persistência local | Runtime publicado e verificado em HTTPS; validação completa da jornada pendente |
+| Conta e ajuda Fio | Cadastro, login e guia contextual integrados; sem verificação de email ou recuperação de senha |
+| Cenário demonstrativo | Um personagem, três decisões e três finais definidos |
+| OpenAI | Adaptador e conversa contextual presentes; testes reais pontuais, sem garantia semântica geral |
+| Persistência no servidor | SQLite em volume Railway; sessão preservada após atualização do contêiner |
+| Exportação verificável | Implementada e testada; hash de integridade não equivale a registro em blockchain |
+| WhatsApp e registro em blockchain | Adaptadores presentes, execução externa desativada |
+| Galeria de idealizações | Conceitos visuais; não comprovam implementação |
 
-Mariana, atendente em início de carreira, representa a usuária principal. Mariana e Roberto são personagens fictícios; a proposta ainda precisa de validação com usuários.
+## Executar localmente
+
+As instruções abaixo executam o protótipo local. A demonstração determinística não exige credenciais.
+
+Requer **Node.js 24 ou superior** e npm. A persistência local usa SQLite nativo do Node.
+
+```sh
+npm ci --include=dev
+```
+
+Em um terminal, inicie a API:
+
+```sh
+npm run server
+```
+
+Em outro, inicie a interface:
+
+```sh
+npm run dev
+```
+
+Abra [http://127.0.0.1:5182](http://127.0.0.1:5182). A API local usa a porta `8782`; seu estado está em `/api/health`.
+
+Sem `OPENAI_API_KEY` e `OPENAI_MODEL` definidos no processo do servidor, o protótipo utiliza **fixture**, uma simulação determinística identificada na interface. Esse modo não interpreta livremente o contexto com IA. Para usar o adaptador OpenAI, configure ambas as variáveis apenas no servidor e confira o modo retornado pelo health check. Nunca inclua chaves no código, no frontend ou em commits.
+
+O arquivo `.env` não é carregado automaticamente por `npm run server`. Se optar por criá-lo localmente a partir de `.env.example`, inicie a API com:
+
+```sh
+node --env-file=.env server/index.mjs
+```
+
+`FRONTLINE_API_PORT` altera a porta da API; se alterá-la, ajuste também o proxy de desenvolvimento. A chave e o modelo são opcionais para explorar o cenário determinístico.
+
+Comandos disponíveis no projeto:
+
+```sh
+npm test
+npm run build
+```
+
+Esses comandos permitem verificar a versão local; sua presença aqui não representa uma alegação de testes aprovados. O runtime em `runtime/` reúne interface e API na mesma origem, com persistência SQLite e orçamento de IA durável. A configuração pública precisa de origem HTTPS exata, cookies Secure e volume persistente; veja [runtime/README.md](runtime/README.md).
+
+## Executar interface e API juntas
+
+Após instalar as dependências:
+
+```sh
+npm run build
+npm start
+```
+
+Sem configuração adicional, esse runtime usa o modo determinístico em `http://127.0.0.1:8782`. Para usar `.env.example` com porta 3000 e origem `http://localhost:3000`, copie-o localmente para `.env` e execute `node --env-file=.env runtime/start.mjs`. O modo OpenAI exige `FRONTLINE_PROVIDER_MODE=openai`, credenciais no servidor e limites explícitos. Há um `Dockerfile` para Node.js 24; persistência deve ser montada em `/data`.
 
 ## Documentação
 
-| Módulo | Conteúdo |
-| --- | --- |
-| [Contexto e fontes](docs/01-contexto-e-fontes.md) | Evolução da conversa, regras reportadas e evidências |
-| [Produto e personas](docs/02-produto-e-personas.md) | Problema, proposta de valor, Mariana, Roberto e hipóteses |
-| [MVP e critérios de aceite](docs/03-mvp-e-criterios-de-aceite.md) | Escopo, requisitos e rubrica oficial pendente |
-| [Mercado e modelo comercial](docs/04-mercado-e-modelo-comercial.md) | TAM, SAM, SOM, concorrentes e premissas |
-| [Pitch e demonstração](docs/05-pitch-e-demonstracao.md) | Roteiro de até três minutos e notas para edição |
-| [Validação e entrega](docs/06-validacao-e-entrega.md) | Backlog, casos de teste propostos e evidências pendentes |
+- [Estado da implementação e verificações](docs/product/implementation-status.md)
+- [Solução completa: problema, personas, telas, dados e integrações](docs/product/solution.md)
+- [Guia de estilo e limites de construção](docs/product/style-guide.md)
+- [Roteiro de demonstração de três minutos](docs/product/demo.md)
+- [Arquivo da galeria visual](docs/visuals/index.html) — abra localmente após clonar; no GitHub, o link mostra o código HTML, não um site publicado.
 
-Origem: [conversa compartilhada](https://chatgpt.com/share/6adb8855-c660-83e9-a31d-bb5154ef496c), consolidada em 23/10/2026. Os documentos distinguem fatos consultados, conteúdo fornecido no chat, hipóteses e propostas.
+As dez vistas podem ser abertas diretamente como imagens:
+
+| Preparação | Prática e revisão | Continuidade planejada |
+|---|---|---|
+| [Biblioteca](docs/visuals/images/flows/01-biblioteca.png) | [Ensaio 2.5D](docs/visuals/images/scene/04-ensaio-v2.png) | [Conectar WhatsApp](docs/visuals/images/channels/08-whatsapp-v2.png) |
+| [Criar situação](docs/visuals/images/flows/02-contexto-v2.png) | [Documentos](docs/visuals/images/scene/05-documento.png) | [Retomar pelo WhatsApp](docs/visuals/images/channels/09-continuidade-v2.png) |
+| [Revisar contexto](docs/visuals/images/flows/03-revisao-v2.png) | [Avaliação](docs/visuals/images/scene/06-avaliacao.png) | [Registro e exportação](docs/visuals/images/channels/10-registro.png) |
+| | [Comparar tentativas](docs/visuals/images/flows/07-comparacao.png) | |
+
+## Estrutura
+
+```text
+web/                 Interface React e cena Three.js
+server/              API HTTP, regras, provedor e persistência
+shared/              Cenário e contrato compartilhados
+tests/               Testes do protótipo
+docs/product/        Produto, design e demonstração
+docs/visuals/        Idealizações da experiência
+```
+
+## Dados e limites
+
+As sessões demonstrativas não executam empréstimos, reservas ou contatos reais. É possível praticar como visitante ou criar uma conta. O cadastro preserva os exercícios do visitante atual; login não importa automaticamente o histórico de outro visitante. Email não é verificado e recuperação de senha não está implementada. Não use informações de clientes reais nos exercícios públicos. Uma avaliação deve se apoiar na conversa e indicar quando não houver evidência suficiente.
+
+### Pesquisa e concepção inicial
+
+Os documentos abaixo preservam a evolução da proposta antes da implementação. Para a entrega atual, priorize os documentos de produto listados acima.
+
+- [Contexto e fontes](docs/01-contexto-e-fontes.md)
+- [Produto e personas](docs/02-produto-e-personas.md)
+- [MVP e critérios de aceite](docs/03-mvp-e-criterios-de-aceite.md)
+- [Mercado e modelo comercial](docs/04-mercado-e-modelo-comercial.md)
+- [Pitch e demonstração inicial](docs/05-pitch-e-demonstracao.md)
+- [Plano inicial de validação](docs/06-validacao-e-entrega.md)

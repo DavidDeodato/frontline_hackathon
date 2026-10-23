@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Frontline — idealização completa</title>
+<style>
+[hidden]{display:none!important}
+:root{font-family:Inter,Arial,sans-serif;color:#18242a;background:#e7ecee;font-synthesis:none;--ink:#18242a;--graphite:#161c22;--paper:#f4f6f6;--cyan:#37cfdb;--line:#dde3e5}*{box-sizing:border-box}body{margin:0}button,a{font:inherit}button{cursor:pointer}a{color:inherit}button:focus-visible,a:focus-visible{outline:3px solid #137985;outline-offset:4px}.gallery-head{padding:20px 28px 14px;display:flex;gap:20px;align-items:center;justify-content:space-between;max-width:1600px;margin:auto}.eyebrow{font-size:11px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#65737c}.gallery-head h1{font-size:21px;margin:5px 0 0;font-weight:650;letter-spacing:-.5px}.links{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.links a,.control{border:1px solid #cbd4d8;padding:9px 12px;border-radius:9px;text-decoration:none;background:#f7f9fa;font-size:12px}.progress{font-size:12px;color:#667780}.board{max-width:1544px;margin:0 auto;padding:0 28px}.screen-tabs{display:flex;gap:7px;padding:8px 0 14px;overflow:auto;scrollbar-width:thin}.screen-tabs button{border:1px solid #cbd4d8;border-radius:8px;padding:9px 11px;white-space:nowrap;background:#eef2f3;color:#52606a;font-size:12px}.screen-tabs button[aria-current="true"]{background:var(--graphite);border-color:var(--graphite);color:white}.screen-tabs .id{opacity:.55;margin-right:7px;font-size:10px}.app-frame{display:grid;grid-template-columns:176px minmax(0,1fr);border:1px solid #c7d0d4;border-radius:16px;overflow:hidden;box-shadow:0 18px 40px #14222b14;background:var(--paper)}.sidebar{background:var(--graphite);color:#b9c1c7;display:flex;flex-direction:column;padding:29px 17px;min-height:500px}.wordmark{color:#fff;letter-spacing:-1.5px;font-weight:750;font-size:27px;margin:0 9px 5px}.workspace{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8d9aa5;margin:0 10px 45px}.nav-label{color:#687681;text-transform:uppercase;letter-spacing:.12em;font-size:10px;margin:0 11px 13px}.product-nav{display:grid;gap:7px}.product-nav a{display:flex;align-items:center;gap:11px;padding:12px;border-radius:9px;text-decoration:none;font-size:12px}.product-nav a.active{color:#fff;background:#29343d;box-shadow:inset 3px 0 var(--cyan)}.nav-icon{font-size:15px;width:16px;opacity:.8}.sidebar-foot{margin-top:auto;padding:30px 10px 0;color:#86949e;font-size:10px;line-height:1.6}.person{margin-top:18px;display:flex;align-items:center;gap:8px;color:#d0d7dc;font-size:12px}.avatar{height:27px;width:27px;display:grid;place-items:center;border:1px solid #54636e;border-radius:50%;font-size:9px}.product-main{min-width:0}.product-top{height:56px;padding:0 23px;display:flex;align-items:center;justify-content:space-between;background:white;border-bottom:1px solid var(--line);font-size:11px;color:#7a8991}.product-top strong{color:#26343c;font-weight:600}.product-top .dot{display:inline-block;background:var(--cyan);height:5px;width:5px;border-radius:50%;margin:0 7px 2px 0}.canvas{position:relative;min-height:400px;background:#f4f6f6;aspect-ratio:4/3;overflow:hidden}.canvas img{display:block;width:100%;height:100%;object-fit:contain;background:#f4f6f6}.pending{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#85939a;font-size:14px}.pending strong{font-weight:500;color:#35454e}.stage-meta{display:flex;gap:18px;justify-content:space-between;align-items:flex-start;padding:18px 0 14px}.frame-title{font-size:17px;letter-spacing:-.3px;font-weight:650;margin:0 0 5px}.time{font-size:12px;line-height:1.5;color:#5b6d76;max-width:740px;margin:0}.frame-actions{display:flex;gap:7px}.control{cursor:pointer;white-space:nowrap}.control:disabled{opacity:.4;cursor:default}.p1{font-size:10px;font-weight:700;border:1px solid #cfdbde;background:#f4f8f9;border-radius:30px;padding:4px 8px;margin-left:8px;vertical-align:2px;letter-spacing:.03em}.details{background:#f2f5f6;border:1px solid #d1dade;border-radius:12px;padding:16px 19px;margin:0 0 26px;font-size:12px;line-height:1.55}.details summary{cursor:pointer;font-weight:600}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:12px}.detail-grid h3{font-size:11px;text-transform:uppercase;letter-spacing:.09em;margin:4px 0 7px;color:#637780}.detail-grid p{margin:0 0 10px}.detail-grid ul{margin:0;padding-left:16px}.note{font-size:11px;color:#667983;border-top:1px solid #d5dfe2;padding-top:12px;margin-top:14px}.gallery-foot{padding:0 28px 25px;font-size:11px;line-height:1.6;color:#667983;max-width:1544px;margin:auto}dialog{border:0;border-radius:12px;padding:0;background:#11191f;max-width:96vw;max-height:95vh;color:white;overflow:auto}dialog::backdrop{background:#0b141de6}.zoombar{display:flex;justify-content:space-between;padding:12px 16px;position:sticky;top:0;background:#11191f;font-size:12px;align-items:center}.zoombar button{background:#293a45;color:white;border:0;border-radius:7px;padding:8px 12px}dialog img{display:block;max-width:none;width:min(1448px,92vw);height:auto} @media(min-width:1500px){.board{max-width:1544px}.sidebar{padding-top:35px}}@media(max-width:800px){.gallery-head{padding:16px;align-items:flex-start}.links{justify-content:flex-end}.links a{font-size:10px}.board{padding:0 12px}.app-frame{grid-template-columns:52px minmax(0,1fr);border-radius:10px}.sidebar{padding:15px 6px;min-height:200px}.wordmark{font-size:12px;letter-spacing:-.5px;writing-mode:vertical-rl;margin:0 auto 25px}.workspace,.nav-label,.product-nav .text,.sidebar-foot,.person{display:none}.product-nav a{padding:10px}.product-top{padding:0 12px;height:43px;font-size:9px}.product-top .demo{display:none}.canvas{min-height:0}.stage-meta{gap:12px;flex-direction:column}.frame-title{font-size:15px}.detail-grid{grid-template-columns:1fr}.gallery-foot{padding:0 16px 20px}.progress{display:none}.links a{padding:7px}.gallery-head h1{font-size:17px}}
+</style></head>
+<body>
+<header class="gallery-head"><div><div class="eyebrow">Pacote visual · 23 out 2026</div><h1>Uma plataforma, dez vistas.</h1></div><div class="links"><span class="progress" id="progress">Verificando imagens…</span><a href="../product/solution.md">Produto ↗</a><a href="../product/demo.md">Roteiro de 3 min ↗</a><a href="manifest.json">Cobertura ↗</a></div></header>
+<main class="board"><nav id="tabs" class="screen-tabs" aria-label="Telas da idealização"></nav>
+<section class="app-frame" aria-label="Composição de referência do Frontline">
+<aside class="sidebar"><div class="wordmark">Frontline</div><div class="workspace">Seu espaço de prática</div><div class="nav-label">Seu trabalho</div><nav class="product-nav" aria-label="Áreas da composição"><a href="#F01" data-section="Praticar"><span class="nav-icon">▤</span><span class="text">Praticar</span></a><a href="#F06" data-section="Revisões"><span class="nav-icon">◫</span><span class="text">Revisões</span></a><a href="#F08" data-section="Conexões"><span class="nav-icon">↗</span><span class="text">Conexões</span></a><a href="#F10" data-section="Registros"><span class="nav-icon">▱</span><span class="text">Registros</span></a></nav><div class="sidebar-foot">Exercícios com contexto.<br>Decisões com consequência.</div><div class="person"><span class="avatar">MO</span><span>Mariana Oliveira</span></div></aside>
+<div class="product-main"><header class="product-top"><span id="breadcrumb">Praticar / <strong>Ensaio</strong></span><span class="demo"><span class="dot"></span>Dados fictícios · contexto de demonstração</span></header><div class="canvas"><div class="pending" id="pending"><strong>Imagem em preparação</strong><span>Esta vista ainda não está disponível.</span></div><img id="screen" alt="" hidden></div></div>
+</section>
+<div class="stage-meta"><div><h2 class="frame-title" id="title"></h2><p class="time" id="time"></p></div><div class="frame-actions"><button class="control" id="prev" aria-label="Tela anterior">←</button><button class="control" id="zoom">Ampliar imagem</button><a class="control" id="original" href="#" target="_blank" rel="noopener">PNG original ↗</a><button class="control" id="next" aria-label="Próxima tela">→</button></div></div>
+<details class="details"><summary>Fluxo, dados e critérios desta vista</summary><div class="detail-grid"><div><h3>Ações e efeito esperado</h3><ul id="actions"></ul><p id="effect"></p><h3>Histórias e dados</h3><p id="stories"></p><p id="data"></p></div><div><h3>Critério de consistência</h3><p id="acceptance"></p><h3>Estado representado</h3><p id="state"></p></div></div><div class="note">Os controles dentro das imagens não executam ações. Esta galeria navega por idealizações. A marca e a navegação são uma composição HTML única; as áreas de conteúdo são imagens geradas, preservadas sem retoque.</div></details>
+</main><footer class="gallery-foot">Conceito visual · aprovação estética pendente · implementação pausada. As vistas P1 mostram fluxos propostos de integração, não serviços já funcionando. Imagens de telas não comprovam backend, aprendizagem, desempenho ou paridade com uma implementação.</footer>
+<dialog id="lightbox"><div class="zoombar"><span id="zoomTitle"></span><button id="closeZoom">Fechar ×</button></div><img id="zoomImage" alt=""></dialog>
+<script id="frameData" type="application/json">{
+  "schemaVersion": "frontline.visual-platform/1.0",
+  "createdOn": "2026-10-23",
+  "brand": "Frontline",
+  "kind": "concept_gallery_not_functional_application",
+  "implementationStatus": "implementation_in_progress_no_parity_verified",
+  "humanVisualApproval": "pending",
+  "sourceLock": "../product/style-guide.md",
+  "imageModelVersion": "not_exposed",
+  "frameDenominator": 10,
+  "userStoryDenominator": 16,
+  "frames": [
+    {
+      "id": "F01",
+      "slug": "biblioteca",
+      "title": "Biblioteca",
+      "section": "Praticar",
+      "file": "images/flows/01-biblioteca.png",
+      "priority": "P0",
+      "us": [
+        "US-01",
+        "US-13"
+      ],
+      "state": "library_with_completed_attempts",
+      "time": "Depois das tentativas A e B; não é o instante da conversa em F04.",
+      "actions": [
+        "Criar situação",
+        "Abrir revisão",
+        "Continuar quando houver sessão pausada"
+      ],
+      "effect": "Seleciona contexto e tentativa corretos; navegar não cria uma sessão.",
+      "data": [
+        "ScenarioVersion",
+        "TrainingSession",
+        "Assessment"
+      ],
+      "acceptance": "Mesmos nomes, versão e finais das duas tentativas. Nenhuma contagem apresentada como ganho de habilidade."
+    },
+    {
+      "id": "F02",
+      "slug": "contexto",
+      "title": "Criar situação",
+      "section": "Praticar",
+      "file": "images/flows/02-contexto-v2.png",
+      "priority": "P0",
+      "us": [
+        "US-02",
+        "US-03",
+        "US-16"
+      ],
+      "state": "draft_editing",
+      "time": "Antes de publicar a versão do exercício.",
+      "actions": [
+        "Descrever contexto",
+        "Informar regras",
+        "Gerar preparação"
+      ],
+      "effect": "Cria rascunho revisável; texto é preservado se geração falhar.",
+      "data": [
+        "ContextDraft",
+        "ScenarioVersion draft"
+      ],
+      "acceptance": "Relato, dados ausentes e template de ambiente são distintos; não promete geração arbitrária de mundos."
+    },
+    {
+      "id": "F03",
+      "slug": "revisao",
+      "title": "Revisar contexto",
+      "section": "Praticar",
+      "file": "images/flows/03-revisao-v2.png",
+      "priority": "P0",
+      "us": [
+        "US-03",
+        "US-04"
+      ],
+      "state": "scenario_ready_for_confirmation",
+      "time": "Antes da primeira tentativa, versão 1 ainda a confirmar.",
+      "actions": [
+        "Corrigir fato",
+        "Marcar desconhecido",
+        "Confirmar e iniciar"
+      ],
+      "effect": "Congela fatos, regras, personagem e rubrica para a tentativa.",
+      "data": [
+        "ContextDraft",
+        "ScenarioVersion",
+        "RubricVersion"
+      ],
+      "acceptance": "Exatamente três critérios; reparo sem prazo confirmado; política e condições explícitas. Nenhum final já alcançado."
+    },
+    {
+      "id": "F04",
+      "slug": "ensaio",
+      "title": "Ensaio 2.5D",
+      "section": "Praticar",
+      "file": "images/scene/04-ensaio-v2.png",
+      "priority": "P0",
+      "us": [
+        "US-05",
+        "US-07",
+        "US-08"
+      ],
+      "state": "TRY-B_awaiting_B06",
+      "time": "Depois de B05 e antes de B06; 5 de 8 mensagens.",
+      "actions": [
+        "Consultar informações",
+        "Escrever resposta",
+        "Enviar resposta",
+        "Alternar para lista"
+      ],
+      "effect": "Fala preservada; regra valida consequência. Proposta ainda não é compromisso concluído.",
+      "data": [
+        "TrainingSession",
+        "Message",
+        "Decision",
+        "policyRules"
+      ],
+      "acceptance": "Roberto único interlocutor; preparo 2/2; pode combinar o empréstimo; confirmação de devolução em 27 out ainda em rascunho."
+    },
+    {
+      "id": "F05",
+      "slug": "documento",
+      "title": "Documento e continuidade",
+      "section": "Praticar",
+      "file": "images/scene/05-documento.png",
+      "priority": "P0",
+      "us": [
+        "US-06",
+        "US-09",
+        "US-13",
+        "US-16"
+      ],
+      "state": "TRY-B_document_open",
+      "time": "Mesmo instante de F04; consulta não acrescenta fala.",
+      "actions": [
+        "Ler política",
+        "Voltar à conversa",
+        "Pausar",
+        "Retomar"
+      ],
+      "effect": "Reabrir documento não soma preparo. Pausa salva; rascunho e estado confirmado permanecem.",
+      "data": [
+        "TrainingSession",
+        "document.opened",
+        "Checkpoint"
+      ],
+      "acceptance": "5 de 8 mensagens; preparo não sobe além de 2; regras iguais F03/F04. Pausar não é concluir."
+    },
+    {
+      "id": "F06",
+      "slug": "avaliacao",
+      "title": "Avaliação",
+      "section": "Revisões",
+      "file": "images/scene/06-avaliacao.png",
+      "priority": "P0",
+      "us": [
+        "US-08",
+        "US-10"
+      ],
+      "state": "TRY-B_completed_END-01",
+      "time": "Após B08; tentativa B encerrada.",
+      "actions": [
+        "Abrir evidência",
+        "Ler melhoria",
+        "Praticar outra resposta"
+      ],
+      "effect": "Avaliação ligada à versão, rubrica e transcrição encerrada.",
+      "data": [
+        "Assessment",
+        "Citation",
+        "TrainingSession"
+      ],
+      "acceptance": "Alternativa viável combinada; três critérios; citações literais; sem nota de competência, sem reparo garantido."
+    },
+    {
+      "id": "F07",
+      "slug": "comparacao",
+      "title": "Comparar tentativas",
+      "section": "Revisões",
+      "file": "images/flows/07-comparacao.png",
+      "priority": "P0",
+      "us": [
+        "US-11",
+        "US-12"
+      ],
+      "state": "TRY-A_TRY-B_completed_comparison",
+      "time": "Após encerrar A e B; mesma versão 1.",
+      "actions": [
+        "Localizar divergência",
+        "Selecionar fala",
+        "Praticar outra resposta"
+      ],
+      "effect": "Cria novo percurso preservando o original; comparação explicita contexto e compromisso.",
+      "data": [
+        "Checkpoint",
+        "TrainingSession",
+        "Message",
+        "Assessment"
+      ],
+      "acceptance": "A: promessa sem respaldo. B: alternativa viável combinada. Mesmos fatos; nenhuma melhora de habilidade inferida."
+    },
+    {
+      "id": "F08",
+      "slug": "whatsapp",
+      "title": "Conectar WhatsApp",
+      "section": "Conexões",
+      "file": "images/channels/08-whatsapp-v2.png",
+      "priority": "P1",
+      "us": [
+        "US-14"
+      ],
+      "state": "channel_not_linked",
+      "time": "Fluxo futuro de conexão; não representa uma integração já funcional.",
+      "actions": [
+        "Iniciar vínculo",
+        "Confirmar no app"
+      ],
+      "effect": "Token temporário e confirmação ligam canal a identidade autenticada.",
+      "data": [
+        "ChannelLink",
+        "account identity"
+      ],
+      "acceptance": "Sem número/token/QR real. Identidade autenticada necessária. A existência de um adaptador não comprova a integração do produto."
+    },
+    {
+      "id": "F09",
+      "slug": "continuidade",
+      "title": "Retomar pelo WhatsApp",
+      "section": "Conexões",
+      "file": "images/channels/09-continuidade-v2.png",
+      "priority": "P1",
+      "us": [
+        "US-13",
+        "US-15",
+        "US-16"
+      ],
+      "state": "proposed_channel_linked_session_resume",
+      "time": "Estado projetado após vínculo e pausa do mesmo treino; não é prova operacional.",
+      "actions": [
+        "Enviar contexto",
+        "Pedir retomada",
+        "Abrir na web",
+        "Revogar vínculo"
+      ],
+      "effect": "Mesma sessão e limites; 2.5D no navegador. Retry não duplica sessão.",
+      "data": [
+        "ChannelLink",
+        "TrainingSession",
+        "CommandReceipt"
+      ],
+      "acceptance": "Mostrar continuidade contextual, não dois chats independentes; estado projetado claramente sinalizado na galeria."
+    },
+    {
+      "id": "F10",
+      "slug": "registro",
+      "title": "Registro e exportação",
+      "section": "Registros",
+      "file": "images/channels/10-registro.png",
+      "priority": "P1",
+      "us": [
+        "EXT-01"
+      ],
+      "state": "export_ready_anchor_not_requested",
+      "time": "Após a avaliação; registro opcional ainda não ancorado.",
+      "actions": [
+        "Exportar registro",
+        "Solicitar recibo opcional",
+        "Verificar cópia"
+      ],
+      "effect": "Exportação portátil; ancoragem assíncrona de integridade, separada da avaliação.",
+      "data": [
+        "ExportManifest",
+        "hashes",
+        "anchorStatus"
+      ],
+      "acceptance": "Sem atestar habilidade ou verdade; sem dados pessoais na cadeia; não registrado/pendente é padrão."
+    }
+  ],
+  "sharedStateCoverage": [
+    {
+      "component": "C-EMPTY",
+      "states": [
+        "biblioteca vazia",
+        "comparação com uma tentativa"
+      ],
+      "surface": [
+        "F01",
+        "F07"
+      ],
+      "representation": "specified_reusable_component_no_separate_raster"
+    },
+    {
+      "component": "C-ASYNC",
+      "states": [
+        "gerando",
+        "enviando",
+        "aguardando avaliação",
+        "falhou"
+      ],
+      "surface": [
+        "F02",
+        "F04",
+        "F06"
+      ],
+      "representation": "specified_reusable_component_no_separate_raster"
+    },
+    {
+      "component": "C-RECOVER",
+      "states": [
+        "sem conexão",
+        "rascunho preservado",
+        "conflito de versão",
+        "retomar"
+      ],
+      "surface": [
+        "F04",
+        "F05",
+        "F09"
+      ],
+      "representation": "specified_reusable_component_no_separate_raster"
+    },
+    {
+      "component": "C-AUTH",
+      "states": [
+        "autenticação necessária",
+        "vínculo expirado",
+        "revogado",
+        "acesso negado"
+      ],
+      "surface": [
+        "F08",
+        "F09"
+      ],
+      "representation": "specified_reusable_component_no_separate_raster"
+    },
+    {
+      "component": "C-INTEGRITY",
+      "states": [
+        "não solicitado",
+        "pendente",
+        "confirmado",
+        "falhou",
+        "cópia divergente"
+      ],
+      "surface": [
+        "F10"
+      ],
+      "representation": "specified_reusable_component_no_separate_raster"
+    }
+  ],
+  "limits": [
+    "Cobertura de histórias e capacidades não equivale a imagem para toda combinação de estados.",
+    "Estados P1 são propostos; dependem de implementação e verificação no Frontline.",
+    "As imagens são referências de design; a validação visual do aplicativo permanece independente.",
+    "Galeria canônica em DOM evita logos divergentes; não prova paridade com o futuro aplicativo."
+  ]
+}</script>
+<script>
+const M=JSON.parse(document.getElementById('frameData').textContent),F=M.frames;
+const el=id=>document.getElementById(id); let selected=0,ready=new Set();
+const tabs=el('tabs');
+for(const [i,f]of F.entries()){let b=document.createElement('button');b.type='button';b.innerHTML='<span class="id">'+f.id+'</span>'+f.title;b.onclick=()=>location.hash=f.id;tabs.append(b);const probe=new Image();probe.onload=()=>{ready.add(f.id);el('progress').textContent=ready.size+' / '+F.length+' imagens disponíveis';if(selected===i)show(i)};probe.onerror=()=>{el('progress').textContent=ready.size+' / '+F.length+' imagens disponíveis'};probe.src=f.file}
+function show(i){selected=i;const f=F[i];[...tabs.children].forEach((b,n)=>b.setAttribute('aria-current',String(n===i)));document.querySelectorAll('[data-section]').forEach(a=>a.classList.toggle('active',a.dataset.section===f.section));el('breadcrumb').innerHTML=f.section+' / <strong>'+f.title+'</strong>';el('title').innerHTML=f.id+' · '+f.title+'<span class="p1">'+(f.priority==='P1'?'P1 · integração proposta':'Núcleo do produto')+'</span>';el('time').textContent=f.time;el('actions').replaceChildren(...f.actions.map(x=>{let li=document.createElement('li');li.textContent=x;return li}));el('effect').textContent=f.effect;el('stories').textContent=f.us.join(' · ');el('data').textContent=f.data.join(' · ');el('acceptance').textContent=f.acceptance;el('state').textContent=f.state;el('screen').hidden=true;el('pending').hidden=false;el('screen').alt='Idealização '+f.id+': '+f.title+'. Dados fictícios.';el('screen').onload=()=>{el('screen').hidden=false;el('pending').hidden=true;el('zoom').disabled=false};el('screen').onerror=()=>{el('screen').hidden=true;el('pending').hidden=false;el('zoom').disabled=true};el('screen').src=f.file;el('original').href=f.file;el('prev').disabled=i===0;el('next').disabled=i===F.length-1;}
+function fromHash(){let i=F.findIndex(f=>f.id===location.hash.slice(1));show(i<0?3:i)}
+el('prev').onclick=()=>location.hash=F[Math.max(0,selected-1)].id;el('next').onclick=()=>location.hash=F[Math.min(F.length-1,selected+1)].id;el('zoom').onclick=()=>{el('zoomImage').src=F[selected].file;el('zoomImage').alt=el('screen').alt;el('zoomTitle').textContent=F[selected].id+' · '+F[selected].title;el('lightbox').showModal()};el('closeZoom').onclick=()=>el('lightbox').close();el('lightbox').onclick=e=>{if(e.target===el('lightbox'))el('lightbox').close()};window.onhashchange=fromHash;document.addEventListener('keydown',e=>{if(el('lightbox').open)return;if(e.key==='ArrowRight'&&selected<F.length-1)location.hash=F[selected+1].id;if(e.key==='ArrowLeft'&&selected>0)location.hash=F[selected-1].id});fromHash();
+</script></body></html>

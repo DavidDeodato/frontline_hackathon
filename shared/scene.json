@@ -1,0 +1,661 @@
+{
+  "schemaVersion": "frontline.scene.v1",
+  "version": "1.1.0",
+  "status": "specification_fixture_not_runtime",
+  "label": "Simulação • dados fictícios",
+  "brand": {
+    "name": "Frontline",
+    "wordmark": "Frontline",
+    "palette": {
+      "shell": "#161C22",
+      "surface": "#F4F6F6",
+      "ink": "#18242A",
+      "accent": "#37CFDB",
+      "warning": "#AC633E"
+    },
+    "logoPolicy": "Um único ativo de marca; imagens não geram logos independentes."
+  },
+  "dataIds": {
+    "scenario": "DATA-SCENARIO",
+    "policy": "DATA-POLICY",
+    "facts": "DATA-FACTS",
+    "rubric": "DATA-RUBRIC",
+    "graph": "DATA-GRAPH",
+    "session": "DATA-SESSION",
+    "transcript": "DATA-TRANSCRIPT",
+    "evaluation": "DATA-EVALUATION",
+    "branch": "DATA-BRANCH",
+    "channel": "DATA-CHANNEL",
+    "receipt": "DATA-RECEIPT"
+  },
+  "scenario": {
+    "id": "SCN-ASSISTENCIA",
+    "version": 1,
+    "title": "A viagem de amanhã",
+    "summary": "Roberto Almeida precisa de um aparelho para viajar; o conserto não tem prazo confirmado.",
+    "workspace": "Pós-venda de aparelhos",
+    "authoredBy": "Mariana Oliveira",
+    "source": "Contexto fictício criado para demonstração",
+    "state": "ready",
+    "goal": "Combinar uma saída viável sem prometer um prazo desconhecido.",
+    "time": {
+      "now": "2026-10-23T15:20:00-03:00",
+      "flight": "2026-10-24T18:00:00-03:00",
+      "tripReturn": "2026-10-27",
+      "loanDue": "2026-10-30"
+    },
+    "actors": [
+      {
+        "id": "mariana",
+        "name": "Mariana Oliveira",
+        "role": "Participante",
+        "description": "Mariana Oliveira é atendente iniciante de e-commerce; pratica um caso de pós-venda de aparelho em assistência técnica."
+      },
+      {
+        "id": "roberto",
+        "name": "Roberto Almeida",
+        "role": "Cliente simulado",
+        "description": "Roberto Almeida viaja amanhã por três dias e precisa de um aparelho para comunicação. É personagem simulado, não persona usuária secundária."
+      }
+    ],
+    "npcCount": 1,
+    "sceneCount": 1
+  },
+  "facts": [
+    {
+      "id": "F-01",
+      "text": "A peça necessária ainda não tem data de chegada confirmada.",
+      "sourceObject": "OBJ-ORDEM",
+      "status": "known"
+    },
+    {
+      "id": "F-02",
+      "text": "Roberto Almeida viaja amanhã às 18h e volta em três dias.",
+      "sourceObject": "MSG-OPEN",
+      "status": "known"
+    },
+    {
+      "id": "F-03",
+      "text": "Há um aparelho provisório disponível.",
+      "sourceObject": "OBJ-POLITICA",
+      "status": "known"
+    },
+    {
+      "id": "F-04",
+      "text": "O aparelho provisório exige documento de identificação e devolução em até sete dias.",
+      "sourceObject": "OBJ-POLITICA",
+      "status": "known"
+    },
+    {
+      "id": "F-05",
+      "text": "Roberto Almeida pode apresentar documento e devolver o aparelho antes de 30 de outubro.",
+      "sourceObject": "MSG-LIA-CONDITIONS",
+      "status": "revealed_when_asked"
+    }
+  ],
+  "policy": {
+    "id": "POL-ASSISTENCIA",
+    "version": 1,
+    "title": "Empréstimo de aparelho",
+    "label": "Política fictícia do exercício",
+    "terms": [
+      "Um aparelho provisório disponível.",
+      "Empréstimo sem cobrança neste exercício.",
+      "Documento de identificação obrigatório.",
+      "Devolução em até sete dias: 30 de outubro.",
+      "Mariana Oliveira pode oferecer o empréstimo quando confirmar as duas condições.",
+      "Não é permitido garantir conclusão do conserto sem confirmação da chegada da peça."
+    ],
+    "unknowns": [
+      "Data de chegada da peça",
+      "Data de conclusão do reparo"
+    ],
+    "humanBoundary": "Revisar a política antes de iniciar; não criar uma obrigação real nem registrar empréstimo em sistema externo."
+  },
+  "rubric": {
+    "id": "RUB-DEMO",
+    "version": 1,
+    "label": "Critérios de demonstração — substituir pelos critérios fornecidos para o desafio",
+    "source": "proposed_demo",
+    "criteria": [
+      {
+        "id": "C-01",
+        "name": "Compreender a necessidade",
+        "observable": "Reconhece a viagem e verifica do que Roberto Almeida precisa para ficar conectada.",
+        "evidenceRequired": "Citação literal da conversa; não inferir estado psicológico."
+      },
+      {
+        "id": "C-02",
+        "name": "Comunicar com clareza e verdade",
+        "observable": "Explicita que o prazo da peça é desconhecido e evita promessa sem base.",
+        "evidenceRequired": "Citação literal associada à ordem de serviço."
+      },
+      {
+        "id": "C-03",
+        "name": "Combinar uma solução viável",
+        "observable": "Verifica a política e combina alternativa ou encaminhamento com condições claras.",
+        "evidenceRequired": "Citação literal e regra/fato que sustentam o acordo."
+      }
+    ],
+    "ratingVocabulary": [
+      "observado",
+      "parcialmente observado",
+      "não observado",
+      "sem evidência suficiente"
+    ],
+    "noGlobalScore": true
+  },
+  "attributes": [
+    {
+      "id": "preparo",
+      "name": "Preparo",
+      "initial": 0,
+      "range": [
+        0,
+        2
+      ],
+      "meaning": "Informações consultadas no exercício.",
+      "rules": [
+        {
+          "event": "document.opened",
+          "objectId": "OBJ-ORDEM",
+          "delta": 1,
+          "once": true
+        },
+        {
+          "event": "document.opened",
+          "objectId": "OBJ-POLITICA",
+          "delta": 1,
+          "once": true
+        }
+      ],
+      "notAClaim": "Abrir documento não prova compreensão; a avaliação usa a conversa."
+    },
+    {
+      "id": "autonomia",
+      "name": "Autonomia de negociação",
+      "initial": 0,
+      "range": [
+        0,
+        2
+      ],
+      "meaning": "Ações permitidas pelas condições verificadas neste exercício, não avaliação de personalidade.",
+      "rules": [
+        {
+          "condition": "policyConsulted",
+          "value": 1,
+          "label": "Pode apresentar a alternativa"
+        },
+        {
+          "condition": "policyConsulted && identityConfirmed && returnWithinSevenDaysConfirmed",
+          "value": 2,
+          "label": "Pode combinar o empréstimo"
+        }
+      ],
+      "boundaries": "O modelo não amplia a política. Um compromisso incompatível permanece inválido."
+    }
+  ],
+  "render": {
+    "catalogId": "CAT-SERVICE-DESK-01",
+    "camera": {
+      "type": "orthographic",
+      "orientation": "three-quarter_top_down",
+      "zoom": "fixed_default_with_accessible_controls"
+    },
+    "geometry": "Um cômodo recortado, balcão, bancada de reparo, duas figuras modulares, estante e três objetos úteis.",
+    "materials": "Volumes simples com sombras suaves; superfícies foscas; telas DOM acessíveis fora do canvas.",
+    "objects": [
+      {
+        "id": "OBJ-ORDEM",
+        "kind": "work_order",
+        "label": "Ordem de serviço",
+        "hotspot": "Balcão",
+        "action": "Abrir o prazo e a peça pendente",
+        "content": "Peça: aguardando confirmação. Prazo do reparo: não confirmado."
+      },
+      {
+        "id": "OBJ-POLITICA",
+        "kind": "policy",
+        "label": "Aparelho provisório",
+        "hotspot": "Estante",
+        "action": "Consultar disponibilidade e condições",
+        "content": "1 disponível · documento de identificação · devolução até 30 out."
+      },
+      {
+        "id": "OBJ-CALENDARIO",
+        "kind": "calendar",
+        "label": "Viagem de Roberto Almeida",
+        "hotspot": "Parede",
+        "action": "Inspecionar prazo relevante",
+        "content": "24 out, 18h · retorno em 27 out."
+      }
+    ],
+    "animationRules": [
+      "Peões modulares podem receber apenas translação curta e destaque; sem rig, articulação humana ou locomoção obrigatória.",
+      "Mensagem provoca gesto discreto e destaque da fala.",
+      "Compromisso aceito aparece como cartão ancorado no balcão.",
+      "Nenhuma locomoção obrigatória para enviar mensagem."
+    ],
+    "fallback": "A mesma ordem, política e calendário em lista DOM; mesma sessão/resultado.",
+    "unsupported": "Não exige geração arbitrária de malhas nem personagem humano realista."
+  },
+  "sessionLimits": {
+    "npcCount": 1,
+    "sceneCount": 1,
+    "maximumVisibleMessages": 8,
+    "messageBudget": {
+      "openingNpc": 1,
+      "user": 3,
+      "intermediateNpc": 2,
+      "closingNpc": 1,
+      "assessmentSummary": 1
+    },
+    "maximumNarrativeDecisions": 3,
+    "officialInteractionUnit": "não esclarecida; opção conservadora conta mensagens visíveis",
+    "clarificationPolicy": "Consome a mesma cota; não inventar resposta nem forçar sucesso.",
+    "incompletePolicy": "Se faltar dado para um desfecho, sessão fica incomplete; isso é estado técnico, não quarto final narrativo."
+  },
+  "graph": {
+    "id": "G-ASSISTENCIA",
+    "version": 1,
+    "entry": "D-01",
+    "decisions": [
+      {
+        "id": "D-01",
+        "name": "Entender a urgência",
+        "question": "O que responder diante do pedido de prazo?",
+        "options": [
+          "Reconhecer a viagem e esclarecer a necessidade",
+          "Prometer o reparo sem confirmação"
+        ],
+        "next": "D-02"
+      },
+      {
+        "id": "D-02",
+        "name": "Examinar a alternativa",
+        "question": "Qual saída cabe nas regras conhecidas?",
+        "options": [
+          "Consultar e propor aparelho provisório",
+          "Explicar limite e combinar acompanhamento",
+          "Repetir promessa sem fonte"
+        ],
+        "next": "D-03"
+      },
+      {
+        "id": "D-03",
+        "name": "Confirmar o compromisso",
+        "question": "O que foi de fato combinado?",
+        "options": [
+          "Confirmar empréstimo com condições verificadas",
+          "Confirmar próximo passo sem prometer reparo",
+          "Garantir o reparo apesar da incerteza"
+        ],
+        "nextByRules": [
+          "END-01",
+          "END-02",
+          "END-03"
+        ]
+      }
+    ],
+    "endings": [
+      {
+        "id": "END-01",
+        "title": "Alternativa viável combinada",
+        "guard": "loanOffered && identityConfirmed && returnWithinSevenDaysConfirmed && customerAccepted && !uncorrectedUnsupportedCommitment",
+        "consequence": "Roberto Almeida dispõe de uma alternativa para a viagem; prazo do reparo continua desconhecido."
+      },
+      {
+        "id": "END-02",
+        "title": "Próximo passo combinado",
+        "guard": "agreedNextStep && !loanAgreement && !uncorrectedUnsupportedCommitment",
+        "consequence": "Roberto Almeida sabe quando receberá nova informação; não há promessa de reparo nem solução material confirmada."
+      },
+      {
+        "id": "END-03",
+        "title": "Promessa sem respaldo",
+        "guard": "uncorrectedUnsupportedCommitment",
+        "consequence": "A conversa criou uma expectativa que a ordem de serviço não permite garantir."
+      }
+    ],
+    "precedence": [
+      "END-03",
+      "END-01",
+      "END-02"
+    ],
+    "engineRules": [
+      "A fala do participante é preservada, mesmo quando contém promessa inválida.",
+      "Intenção estruturada cita a mensagem de origem; ambiguidade não aplica compromisso.",
+      "Correção explícita pode retirar promessa pendente antes do encerramento, mantendo o histórico.",
+      "Não confundir cliente satisfeita com atendimento correto.",
+      "O validador deve provar alcance dos três finais em fixtures antes da demo."
+    ]
+  },
+  "attempts": [
+    {
+      "id": "TRY-A",
+      "label": "Primeira tentativa",
+      "scenarioVersion": 1,
+      "status": "completed",
+      "ending": "END-03",
+      "messages": [
+        {
+          "id": "A-01",
+          "speaker": "Roberto Almeida",
+          "role": "npc",
+          "text": "Viajo amanhã às 18h. Preciso do aparelho para falar com minha família. Vocês conseguem me entregar antes disso?"
+        },
+        {
+          "id": "A-02",
+          "speaker": "Mariana Oliveira",
+          "role": "user",
+          "text": "Entendo sua preocupação. Vou garantir que fique pronto antes da viagem."
+        },
+        {
+          "id": "A-03",
+          "speaker": "Roberto Almeida",
+          "role": "npc",
+          "text": "A peça já chegou? Preciso saber se posso contar com isso."
+        },
+        {
+          "id": "A-04",
+          "speaker": "Mariana Oliveira",
+          "role": "user",
+          "text": "Ainda não temos confirmação da peça, mas vou pedir prioridade."
+        },
+        {
+          "id": "A-05",
+          "speaker": "Roberto Almeida",
+          "role": "npc",
+          "text": "Então o aparelho vai estar pronto amanhã mesmo?"
+        },
+        {
+          "id": "A-06",
+          "speaker": "Mariana Oliveira",
+          "role": "user",
+          "text": "Sim, pode contar com o aparelho pronto amanhã."
+        },
+        {
+          "id": "A-07",
+          "speaker": "Roberto Almeida",
+          "role": "npc",
+          "text": "Vou me organizar contando com essa entrega."
+        },
+        {
+          "id": "A-08",
+          "speaker": "Frontline",
+          "role": "assessment_summary",
+          "text": "Promessa sem respaldo: a peça não tem chegada confirmada. Refaça a resposta para combinar uma alternativa viável."
+        }
+      ],
+      "commitment": {
+        "text": "Aparelho reparado antes da viagem",
+        "status": "unsupported",
+        "sourceMessageId": "A-06",
+        "conflictingFactId": "F-01"
+      },
+      "evaluation": [
+        {
+          "criterionId": "C-01",
+          "rating": "parcialmente observado",
+          "quoteMessageId": "A-02",
+          "quote": "Entendo sua preocupação.",
+          "reason": "Reconhece a preocupação, sem investigar uma alternativa para comunicação."
+        },
+        {
+          "criterionId": "C-02",
+          "rating": "não observado",
+          "quoteMessageId": "A-06",
+          "quote": "Sim, pode contar com o aparelho pronto amanhã.",
+          "reason": "Garante um prazo que a ordem de serviço não confirma."
+        },
+        {
+          "criterionId": "C-03",
+          "rating": "não observado",
+          "quoteMessageId": "A-04",
+          "quote": "Ainda não temos confirmação da peça, mas vou pedir prioridade.",
+          "reason": "Priorizar não resolve a ausência de confirmação; nenhuma alternativa foi combinada."
+        }
+      ]
+    },
+    {
+      "id": "TRY-B",
+      "label": "Nova tentativa",
+      "scenarioVersion": 1,
+      "branchOf": "TRY-A",
+      "branchAt": "before-A-02",
+      "status": "completed",
+      "ending": "END-01",
+      "messages": [
+        {
+          "id": "B-01",
+          "speaker": "Roberto Almeida",
+          "role": "npc",
+          "text": "Viajo amanhã às 18h. Preciso do aparelho para falar com minha família. Vocês conseguem me entregar antes disso?"
+        },
+        {
+          "id": "B-02",
+          "speaker": "Mariana Oliveira",
+          "role": "user",
+          "text": "Entendo a urgência. A peça ainda não tem prazo confirmado. Um aparelho provisório para comunicação ajudaria durante a viagem?"
+        },
+        {
+          "id": "B-03",
+          "speaker": "Roberto Almeida",
+          "role": "npc",
+          "text": "Ajudaria, sim. Vou viajar por três dias. Como funciona?"
+        },
+        {
+          "id": "B-04",
+          "speaker": "Mariana Oliveira",
+          "role": "user",
+          "text": "Há um disponível, sem cobrança. Preciso confirmar seu documento e a devolução em até sete dias. Você consegue cumprir essas condições?"
+        },
+        {
+          "id": "B-05",
+          "speaker": "Roberto Almeida",
+          "role": "npc",
+          "text": "Estou com meu documento e posso devolver no dia 27."
+        },
+        {
+          "id": "B-06",
+          "speaker": "Mariana Oliveira",
+          "role": "user",
+          "text": "Combinado: aparelho provisório com devolução em 27 de outubro. O prazo do reparo continua sem confirmação; aviso quando houver uma atualização."
+        },
+        {
+          "id": "B-07",
+          "speaker": "Roberto Almeida",
+          "role": "npc",
+          "text": "Está bem. Com o provisório consigo viajar e aguardar a confirmação do reparo."
+        },
+        {
+          "id": "B-08",
+          "speaker": "Frontline",
+          "role": "assessment_summary",
+          "text": "Alternativa viável combinada. Você explicitou a incerteza e confirmou as condições do empréstimo."
+        }
+      ],
+      "commitment": {
+        "text": "Aparelho provisório · devolução 27 out",
+        "status": "valid",
+        "sourceMessageId": "B-06",
+        "policyId": "POL-ASSISTENCIA"
+      },
+      "evaluation": [
+        {
+          "criterionId": "C-01",
+          "rating": "observado",
+          "quoteMessageId": "B-02",
+          "quote": "Um aparelho provisório para comunicação ajudaria durante a viagem?",
+          "reason": "Investiga se a alternativa atende à necessidade declarada."
+        },
+        {
+          "criterionId": "C-02",
+          "rating": "observado",
+          "quoteMessageId": "B-06",
+          "quote": "O prazo do reparo continua sem confirmação",
+          "reason": "Mantém explícita a incerteza do reparo."
+        },
+        {
+          "criterionId": "C-03",
+          "rating": "observado",
+          "quoteMessageId": "B-04",
+          "quote": "Preciso confirmar seu documento e a devolução em até sete dias.",
+          "reason": "Verifica as condições antes de assumir o compromisso."
+        }
+      ]
+    },
+    {
+      "id": "TRY-C",
+      "label": "Encaminhamento acordado",
+      "scenarioVersion": 1,
+      "status": "completed",
+      "ending": "END-02",
+      "messages": [
+        {
+          "id": "C-01",
+          "speaker": "Roberto Almeida",
+          "role": "npc",
+          "text": "Viajo amanhã às 18h. Preciso do aparelho para falar com minha família. Vocês conseguem me entregar antes disso?"
+        },
+        {
+          "id": "C-02",
+          "speaker": "Mariana Oliveira",
+          "role": "user",
+          "text": "Entendo a urgência. A peça não tem chegada confirmada. Um aparelho provisório ajudaria durante a viagem?"
+        },
+        {
+          "id": "C-03",
+          "speaker": "Roberto Almeida",
+          "role": "npc",
+          "text": "Prefiro não pegar outro aparelho agora. Quero acompanhar a situação do meu."
+        },
+        {
+          "id": "C-04",
+          "speaker": "Mariana Oliveira",
+          "role": "user",
+          "text": "Posso combinar uma atualização amanhã às 10h, mesmo se ainda não houver confirmação da peça. Esse horário funciona?"
+        },
+        {
+          "id": "C-05",
+          "speaker": "Roberto Almeida",
+          "role": "npc",
+          "text": "Sim, às 10h consigo me organizar antes da viagem."
+        },
+        {
+          "id": "C-06",
+          "speaker": "Mariana Oliveira",
+          "role": "user",
+          "text": "Combinado: atualização amanhã às 10h. Ainda não podemos garantir o reparo antes da viagem."
+        },
+        {
+          "id": "C-07",
+          "speaker": "Roberto Almeida",
+          "role": "npc",
+          "text": "Certo. Vou aguardar a atualização sabendo que o reparo ainda não está confirmado."
+        },
+        {
+          "id": "C-08",
+          "speaker": "Frontline",
+          "role": "assessment_summary",
+          "text": "Próximo passo combinado. O atendimento manteve a incerteza explícita, mas a necessidade de um aparelho ainda não foi resolvida."
+        }
+      ],
+      "commitment": {
+        "text": "Atualização em 24 out às 10h; sem garantia do reparo",
+        "status": "valid",
+        "sourceMessageId": "C-06",
+        "policyId": "POL-ASSISTENCIA"
+      },
+      "evaluation": [
+        {
+          "criterionId": "C-01",
+          "rating": "observado",
+          "quoteMessageId": "C-02",
+          "quote": "Um aparelho provisório ajudaria durante a viagem?",
+          "reason": "Investiga a alternativa; a preferência do cliente permanece registrada."
+        },
+        {
+          "criterionId": "C-02",
+          "rating": "observado",
+          "quoteMessageId": "C-06",
+          "quote": "Ainda não podemos garantir o reparo antes da viagem.",
+          "reason": "Não transforma o horário da atualização em promessa de conserto."
+        },
+        {
+          "criterionId": "C-03",
+          "rating": "parcialmente observado",
+          "quoteMessageId": "C-04",
+          "quote": "Posso combinar uma atualização amanhã às 10h",
+          "reason": "Combina um próximo passo viável; a necessidade material de um aparelho permanece pendente."
+        }
+      ]
+    }
+  ],
+  "pathProofFixtures": [
+    {
+      "id": "PATH-01",
+      "actions": [
+        "acknowledge_and_clarify",
+        "inspect_policy_and_offer_loan",
+        "confirm_loan_with_conditions"
+      ],
+      "result": "END-01"
+    },
+    {
+      "id": "PATH-02",
+      "actions": [
+        "acknowledge_and_clarify",
+        "explain_unknown_eta",
+        "agree_update_tomorrow_10_without_repair_guarantee"
+      ],
+      "result": "END-02"
+    },
+    {
+      "id": "PATH-03",
+      "actions": [
+        "promise_repair",
+        "repeat_unconfirmed_eta",
+        "guarantee_repair_tomorrow"
+      ],
+      "result": "END-03"
+    }
+  ],
+  "frameSnapshots": {
+    "F01": {
+      "state": "ready",
+      "selectedScenario": "SCN-ASSISTENCIA",
+      "selectedVersion": 1,
+      "cta": "Iniciar ensaio",
+      "copy": "Seu contexto vira uma situação para praticar."
+    },
+    "F02": {
+      "state": "awaiting_user",
+      "attemptId": "TRY-B",
+      "visibleThrough": "B-05",
+      "decision": "D-03",
+      "preparo": 2,
+      "autonomia": 2,
+      "proposal": "Aparelho provisório · confirmar devolução em 27 out",
+      "proposalStatus": "draft",
+      "cta": "Enviar resposta",
+      "showOutcome": false
+    },
+    "F03": {
+      "state": "comparing_completed_attempts",
+      "left": "TRY-A",
+      "right": "TRY-B",
+      "highlightCriterion": "C-02",
+      "cta": "Praticar outra resposta",
+      "copy": "Mudou a promessa. Mudou o resultado."
+    },
+    "F04": {
+      "state": "channel_not_linked",
+      "channel": "WhatsApp",
+      "cta": "Conectar WhatsApp",
+      "copy": "Continue a mesma sessão pelo celular.",
+      "receiptStatus": "not_requested",
+      "noPhoneDisplayed": true
+    }
+  }
+}

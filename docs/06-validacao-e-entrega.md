@@ -1,5 +1,7 @@
 # Validação e entrega
 
+> Registro da concepção inicial, anterior à implementação. Para o estado atual do produto e da entrega, consulte [estado da implementação](product/implementation-status.md) e [roteiro atual de demonstração](product/demo.md). As pendências e descrições de ausência de código abaixo pertencem àquele momento inicial.
+
 Este documento propõe um roteiro para a futura aplicação. Nenhum caso abaixo foi executado em software: o repositório foi iniciado com documentação.
 
 ## Backlog inicial

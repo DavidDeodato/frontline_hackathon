@@ -1,0 +1,26 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+data/
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+*.log
+.local/
+.private/
+.vercel/
+.railway/
+coverage/
+playwright-report/
+test-results/
+*.pem
+*.key
+*.p12
+.DS_Store
+Thumbs.db
+
+# Local test sessions and diagnostic artifacts
+qa/evidence/
