@@ -128,3 +128,14 @@ docs/visuals/        Idealizações da experiência
 ## Dados e limites
 
 As sessões demonstrativas não executam empréstimos, reservas ou contatos reais. É possível praticar como visitante ou criar uma conta. O cadastro preserva os exercícios do visitante atual; login não importa automaticamente o histórico de outro visitante. Email não é verificado e recuperação de senha não está implementada. Não use informações de clientes reais nos exercícios públicos. Uma avaliação deve se apoiar na conversa e indicar quando não houver evidência suficiente.
+
+### Pesquisa e concepção inicial
+
+Os documentos abaixo preservam a evolução da proposta antes da implementação. Para a entrega atual, priorize os documentos de produto listados acima.
+
+- [Contexto e fontes](docs/01-contexto-e-fontes.md)
+- [Produto e personas](docs/02-produto-e-personas.md)
+- [MVP e critérios de aceite](docs/03-mvp-e-criterios-de-aceite.md)
+- [Mercado e modelo comercial](docs/04-mercado-e-modelo-comercial.md)
+- [Pitch e demonstração inicial](docs/05-pitch-e-demonstracao.md)
+- [Plano inicial de validação](docs/06-validacao-e-entrega.md)
